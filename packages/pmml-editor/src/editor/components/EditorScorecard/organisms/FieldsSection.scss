@@ -1,0 +1,64 @@
+.fields-sections {
+  height: 100%;
+  background: #fff;
+  padding: var(--pf-c-page__main-section--PaddingTop);
+  &__toggle {
+    text-align: left;
+    position: relative;
+    margin-top: -1px;
+    &:after {
+      border-radius: 0;
+    }
+    &__icon {
+      position: absolute;
+      right: 12px;
+      top: 10px;
+      transition: transform 0.23s ease-in-out;
+      transform: rotate(0);
+    }
+    &--active {
+      .fields-sections__toggle__icon {
+        transform: rotate(90deg);
+      }
+    }
+  }
+  &__toggle + &__toggle {
+    margin-top: 16px;
+  }
+  &__content {
+    height: calc(100% - 130px);
+    padding: var(--pf-global--spacer--md) 0;
+
+    // overrides required to cancel some modal related styles
+    .data-dictionary {
+      height: 100%;
+      & > div {
+        margin: 0 0 1em !important;
+      }
+      &__types-list {
+        height: calc(100% - 54px);
+      }
+    }
+    .mining-schema {
+      height: 100%;
+      .pf-l-stack,
+      .pf-l-stack__item:last-of-type {
+        height: 100%;
+      }
+      & > .pf-l-stack > .pf-l-stack__item:nth-child(1),
+      & > .pf-l-stack > .pf-l-stack__item:nth-child(3) h4 {
+        display: none;
+      }
+      &__fields {
+        height: 100%;
+        margin-top: 0;
+      }
+      &__edit__form {
+        height: calc(100% - 76px);
+      }
+    }
+    .outputs-container {
+      height: 100%;
+    }
+  }
+}

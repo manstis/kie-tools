@@ -73,7 +73,7 @@ const MiningSchemaAddFields = ({ options, onAdd }: MiningSchemaAddFieldsProps) =
             selections={selected}
             isOpen={isOpen}
             aria-labelledby={"Select fields to add"}
-            placeholderText="Select fields"
+            placeholderText="Select fields to add"
             isDisabled={options.length === 0}
           >
             {selectOptions.map((option, index) => (

@@ -170,7 +170,7 @@ export const OutputsContainer = (props: OutputsContainerProps) => {
                     Add Output
                   </Button>
                 </StackItem>
-                <StackItem className="outputs-container__overview">
+                <StackItem className="outputs-container__overview" isFilled={true}>
                   <OutputFieldsTable
                     activeOperation={activeOperation}
                     onEditOutputField={onEditOutputField}
@@ -211,7 +211,7 @@ export const OutputsContainer = (props: OutputsContainerProps) => {
                 <StackItem>
                   <Button
                     variant="primary"
-                    onClick={e => setViewSection("overview")}
+                    onClick={() => setViewSection("overview")}
                     icon={<ArrowAltCircleLeftIcon />}
                     iconPosition="left"
                   >
