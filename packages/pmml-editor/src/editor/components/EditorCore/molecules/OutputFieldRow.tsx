@@ -33,14 +33,13 @@ export const OutputFieldRow = (props: OutputFieldRowProps) => {
   return (
     <article className={`output-item output-item-n${activeOutputFieldIndex}`}>
       <Split hasGutter={true} style={{ height: "100%" }}>
-        <SplitItem>
+        <SplitItem style={{ whiteSpace: "nowrap" }}>
           <strong>{activeOutputField.name}</strong>
         </SplitItem>
         <SplitItem isFilled={true}>
           <Label color="blue" className="output-item__type-label">
             {activeOutputField.dataType}
           </Label>
-          <OutputLabels activeOutputField={activeOutputField} />
         </SplitItem>
         <SplitItem>
           <OutputFieldRowAction
@@ -50,6 +49,10 @@ export const OutputFieldRow = (props: OutputFieldRowProps) => {
           />
         </SplitItem>
       </Split>
+      <section>
+        <span>Properties </span>
+        <OutputLabels activeOutputField={activeOutputField} />
+      </section>
     </article>
   );
 };

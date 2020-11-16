@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import * as React from "react";
-import { Button, Flex, FlexItem } from "@patternfly/react-core";
+import { Button } from "@patternfly/react-core";
 import { EditAltIcon, TrashIcon } from "@patternfly/react-icons";
 
 interface OutputsTableActionProps {
@@ -27,15 +27,13 @@ export const OutputFieldRowAction = (props: OutputsTableActionProps) => {
   const { disabled, onEditDataField, onDeleteDataField } = props;
 
   return (
-    <Flex alignItems={{ default: "alignItemsCenter" }} style={{ height: "100%" }}>
-      <FlexItem>
-        <Button variant="plain" onClick={onEditDataField} isDisabled={disabled}>
-          <EditAltIcon />
-        </Button>
-        <Button variant="plain" onClick={onDeleteDataField} isDisabled={disabled}>
-          <TrashIcon />
-        </Button>
-      </FlexItem>
-    </Flex>
+    <section style={{ whiteSpace: "nowrap" }}>
+      <Button variant="plain" onClick={onEditDataField} isDisabled={disabled}>
+        <EditAltIcon />
+      </Button>
+      <Button variant="plain" onClick={onDeleteDataField} isDisabled={disabled}>
+        <TrashIcon />
+      </Button>
+    </section>
   );
 };
