@@ -54,11 +54,8 @@ const MiningSchemaItem = ({ field, index, onAddProperties, onDelete, onPropertyD
   return (
     <li className="mining-schema-list__item" key={field.name as string}>
       <Split hasGutter={true}>
-        <SplitItem>
-          <span className="mining-schema-list__item__name">{field.name}</span>
-        </SplitItem>
         <SplitItem isFilled={true}>
-          <MiningSchemaFieldLabels field={field} onEdit={addProperties} onDelete={deleteProperty} />
+          <span className="mining-schema-list__item__name">{field.name}</span>
         </SplitItem>
         <SplitItem>
           <Button variant="plain" onClick={deleteField}>
@@ -66,6 +63,10 @@ const MiningSchemaItem = ({ field, index, onAddProperties, onDelete, onPropertyD
           </Button>
         </SplitItem>
       </Split>
+      <section>
+        <span>Properties </span>
+        <MiningSchemaFieldLabels field={field} onEdit={addProperties} onDelete={deleteProperty} />
+      </section>
     </li>
   );
 };

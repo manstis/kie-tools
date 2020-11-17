@@ -106,7 +106,11 @@ export const ScorecardEditorPage = (props: ScorecardEditorPageProps) => {
       {!model && <EmptyStateModelNotFound />}
       {model && (
         <>
-          <PageSection variant={PageSectionVariants.light} isFilled={false}>
+          <PageSection
+            variant={PageSectionVariants.light}
+            isFilled={false}
+            style={{ borderBottom: "1px solid var(--pf-c-divider--BackgroundColor)" }}
+          >
             <EditorHeader
               title={getModelName(model)}
               activeOperation={activeOperation}
@@ -180,11 +184,7 @@ export const ScorecardEditorPage = (props: ScorecardEditorPageProps) => {
           </PageSection>
           <Grid hasGutter={false}>
             <GridItem span={4}>
-              <PageSection
-                isFilled={true}
-                padding={{ default: "noPadding" }}
-                style={{ height: "100%", paddingBottom: "var(--pf-c-page__main-section--PaddingBottom)" }}
-              >
+              <PageSection isFilled={true} padding={{ default: "noPadding" }} style={{ height: "100%" }}>
                 <FieldsSection
                   modelIndex={modelIndex}
                   miningSchema={miningSchema}
