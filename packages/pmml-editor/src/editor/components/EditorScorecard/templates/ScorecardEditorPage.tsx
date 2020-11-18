@@ -15,7 +15,7 @@
  */
 import * as React from "react";
 import { useCallback, useMemo, useState } from "react";
-import { PageSection, PageSectionVariants } from "@patternfly/react-core";
+import { Grid, GridItem, PageSection, PageSectionVariants } from "@patternfly/react-core";
 import { EditorHeader } from "../../EditorCore/molecules";
 import {
   Characteristics,
@@ -34,6 +34,7 @@ import { EmptyStateNoCharacteristics, EmptyStateNoMatchingCharacteristics } from
 import "./ScorecardEditorPage.scss";
 import { Operation } from "../Operation";
 import { EmptyStateModelNotFound } from "../../EditorCore/organisms";
+import FieldsSection from "../organisms/FieldsSection";
 
 interface ScorecardEditorPageProps {
   path: string;
@@ -105,7 +106,11 @@ export const ScorecardEditorPage = (props: ScorecardEditorPageProps) => {
       {!model && <EmptyStateModelNotFound />}
       {model && (
         <>
-          <PageSection variant={PageSectionVariants.light} isFilled={false}>
+          <PageSection
+            variant={PageSectionVariants.light}
+            isFilled={false}
+            style={{ borderBottom: "1px solid var(--pf-c-divider--BackgroundColor)" }}
+          >
             <EditorHeader
               title={getModelName(model)}
               activeOperation={activeOperation}
@@ -177,88 +182,164 @@ export const ScorecardEditorPage = (props: ScorecardEditorPageProps) => {
               }}
             />
           </PageSection>
-
-          <PageSection isFilled={false}>
-            <CorePropertiesTable
-              activeOperation={activeOperation}
-              setActiveOperation={setActiveOperation}
-              isScorable={model.isScorable ?? true}
-              functionName={model.functionName}
-              algorithmName={model.algorithmName ?? ""}
-              baselineScore={model.baselineScore ?? 0}
-              baselineMethod={model.baselineMethod ?? "other"}
-              initialScore={model.initialScore ?? 0}
-              useReasonCodes={model.useReasonCodes ?? true}
-              reasonCodeAlgorithm={model.reasonCodeAlgorithm ?? "pointsBelow"}
-              commit={_props => {
-                dispatch({
-                  type: Actions.Scorecard_SetCoreProperties,
-                  payload: {
-                    modelIndex: modelIndex,
-                    isScorable: _props.isScorable,
-                    functionName: _props.functionName,
-                    algorithmName: _props.algorithmName,
-                    baselineScore: _props.baselineScore,
-                    baselineMethod: _props.baselineMethod,
-                    initialScore: _props.initialScore,
-                    useReasonCodes: _props.useReasonCodes,
-                    reasonCodeAlgorithm: _props.reasonCodeAlgorithm
-                  }
-                });
-              }}
-            />
-          </PageSection>
-
-          <PageSection isFilled={true} style={{ paddingTop: "0px" }}>
-            <PageSection variant={PageSectionVariants.light}>
-              <div>
-                <CharacteristicsContainer
+          <Grid hasGutter={false}>
+            <GridItem span={4}>
+              <PageSection isFilled={true} padding={{ default: "noPadding" }} style={{ height: "100%" }}>
+                <FieldsSection
                   modelIndex={modelIndex}
+                  miningSchema={miningSchema}
                   activeOperation={activeOperation}
                   setActiveOperation={setActiveOperation}
-                  characteristics={filteredCharacteristics}
-                  onFilter={setFilter}
-                  emptyStateProvider={() => characteristicsEmptyStateProvider}
-                  addCharacteristic={onAddCharacteristic}
-                  deleteCharacteristic={index => {
-                    if (window.confirm(`Delete Characteristic "${index}"?`)) {
+                  output={output}
+                  validateOutputFieldName={validateOutputName}
+                  deleteOutputField={_index => {
+                    if (window.confirm(`Delete Output "${_index}"?`)) {
                       dispatch({
-                        type: Actions.Scorecard_DeleteCharacteristic,
+                        type: Actions.DeleteOutput,
                         payload: {
                           modelIndex: modelIndex,
-                          characteristicIndex: index
+                          outputIndex: _index
                         }
                       });
                     }
                   }}
-                  commit={(_index, _name, _reasonCode, _baselineScore) => {
+                  commit={(
+                    _index,
+                    _name,
+                    _dataType,
+                    _optype,
+                    _targetField,
+                    _feature,
+                    _value,
+                    _rank,
+                    _rankOrder,
+                    _segmentId,
+                    _isFinalResult
+                  ) => {
                     if (_index === undefined) {
                       dispatch({
-                        type: Actions.Scorecard_AddCharacteristic,
+                        type: Actions.AddOutput,
                         payload: {
                           modelIndex: modelIndex,
                           name: _name,
-                          reasonCode: _reasonCode,
-                          baselineScore: _baselineScore
+                          dataType: _dataType,
+                          optype: _optype,
+                          targetField: _targetField,
+                          feature: _feature,
+                          value: _value,
+                          rank: _rank,
+                          rankOrder: _rankOrder,
+                          segmentId: _segmentId,
+                          isFinalResult: _isFinalResult
                         }
                       });
                     } else {
                       dispatch({
-                        type: Actions.Scorecard_UpdateCharacteristic,
+                        type: Actions.UpdateOutput,
                         payload: {
                           modelIndex: modelIndex,
-                          characteristicIndex: _index,
+                          outputIndex: _index,
                           name: _name,
-                          reasonCode: _reasonCode,
-                          baselineScore: _baselineScore
+                          dataType: _dataType,
+                          optype: _optype,
+                          targetField: _targetField,
+                          feature: _feature,
+                          value: _value,
+                          rank: _rank,
+                          rankOrder: _rankOrder,
+                          segmentId: _segmentId,
+                          isFinalResult: _isFinalResult
                         }
                       });
                     }
                   }}
                 />
-              </div>
-            </PageSection>
-          </PageSection>
+              </PageSection>
+            </GridItem>
+            <GridItem span={8}>
+              <PageSection isFilled={false}>
+                <CorePropertiesTable
+                  activeOperation={activeOperation}
+                  setActiveOperation={setActiveOperation}
+                  isScorable={model.isScorable ?? true}
+                  functionName={model.functionName}
+                  algorithmName={model.algorithmName ?? ""}
+                  baselineScore={model.baselineScore ?? 0}
+                  baselineMethod={model.baselineMethod ?? "other"}
+                  initialScore={model.initialScore ?? 0}
+                  useReasonCodes={model.useReasonCodes ?? true}
+                  reasonCodeAlgorithm={model.reasonCodeAlgorithm ?? "pointsBelow"}
+                  commit={_props => {
+                    dispatch({
+                      type: Actions.Scorecard_SetCoreProperties,
+                      payload: {
+                        modelIndex: modelIndex,
+                        isScorable: _props.isScorable,
+                        functionName: _props.functionName,
+                        algorithmName: _props.algorithmName,
+                        baselineScore: _props.baselineScore,
+                        baselineMethod: _props.baselineMethod,
+                        initialScore: _props.initialScore,
+                        useReasonCodes: _props.useReasonCodes,
+                        reasonCodeAlgorithm: _props.reasonCodeAlgorithm
+                      }
+                    });
+                  }}
+                />
+              </PageSection>
+
+              <PageSection isFilled={true} style={{ paddingTop: "0px" }}>
+                <PageSection variant={PageSectionVariants.light}>
+                  <div>
+                    <CharacteristicsContainer
+                      modelIndex={modelIndex}
+                      activeOperation={activeOperation}
+                      setActiveOperation={setActiveOperation}
+                      characteristics={filteredCharacteristics}
+                      onFilter={setFilter}
+                      emptyStateProvider={() => characteristicsEmptyStateProvider}
+                      addCharacteristic={onAddCharacteristic}
+                      deleteCharacteristic={index => {
+                        if (window.confirm(`Delete Characteristic "${index}"?`)) {
+                          dispatch({
+                            type: Actions.Scorecard_DeleteCharacteristic,
+                            payload: {
+                              modelIndex: modelIndex,
+                              characteristicIndex: index
+                            }
+                          });
+                        }
+                      }}
+                      commit={(_index, _name, _reasonCode, _baselineScore) => {
+                        if (_index === undefined) {
+                          dispatch({
+                            type: Actions.Scorecard_AddCharacteristic,
+                            payload: {
+                              modelIndex: modelIndex,
+                              name: _name,
+                              reasonCode: _reasonCode,
+                              baselineScore: _baselineScore
+                            }
+                          });
+                        } else {
+                          dispatch({
+                            type: Actions.Scorecard_UpdateCharacteristic,
+                            payload: {
+                              modelIndex: modelIndex,
+                              characteristicIndex: _index,
+                              name: _name,
+                              reasonCode: _reasonCode,
+                              baselineScore: _baselineScore
+                            }
+                          });
+                        }
+                      }}
+                    />
+                  </div>
+                </PageSection>
+              </PageSection>
+            </GridItem>
+          </Grid>
         </>
       )}
     </div>
