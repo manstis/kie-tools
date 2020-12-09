@@ -21,7 +21,6 @@ import { CharacteristicsTableEditRow, CharacteristicsTableRow } from "../molecul
 import { Operation } from "../Operation";
 import { useSelector } from "react-redux";
 import { OperationContext } from "../../../PMMLEditor";
-import RowWrapper from "../../EditorCore/molecules/RowWrapper";
 
 export interface IndexedCharacteristic {
   index: number | undefined;
@@ -100,7 +99,12 @@ export const CharacteristicsTable = (props: CharacteristicsTableProps) => {
     >
       <section>
         {characteristics.map(ic => (
-          <RowWrapper index={ic.index as number} selectedIndex={selectedCharacteristicIndex}>
+          <article
+            key={ic.index}
+            className={`editable-item output-item-n${selectedCharacteristicIndex} ${
+              selectedCharacteristicIndex === ic.index ? "editable-item--editing" : ""
+            }`}
+          >
             {selectedCharacteristicIndex === ic.index && activeOperation === Operation.UPDATE_CHARACTERISTIC && (
               <CharacteristicsTableEditRow
                 modelIndex={modelIndex}
@@ -123,7 +127,7 @@ export const CharacteristicsTable = (props: CharacteristicsTableProps) => {
                 onDelete={() => onDelete(ic.index)}
               />
             )}
-          </RowWrapper>
+          </article>
         ))}
       </section>
     </Form>
