@@ -23,6 +23,7 @@ import { EmptyStateNoOutput } from "./EmptyStateNoOutput";
 import OutputFieldRow from "../molecules/OutputFieldRow";
 import OutputFieldEditRow from "../molecules/OutputFieldEditRow";
 import { OperationContext } from "../../../PMMLEditor";
+import RowWrapper from "../../EditorCore/molecules/RowWrapper";
 
 interface OutputFieldsTableProps {
   modelIndex: number;
@@ -86,14 +87,9 @@ const OutputFieldsTable = (props: OutputFieldsTableProps) => {
     >
       <section>
         {outputs.map((o, index) => (
-          <article
-            className={`editable-item output-item-n${selectedOutputIndex} ${
-              selectedOutputIndex === index ? "editable-item--editing" : ""
-            }`}
-          >
+          <RowWrapper index={index} selectedIndex={selectedOutputIndex}>
             {selectedOutputIndex === index && (
               <OutputFieldEditRow
-                key={index}
                 outputField={o}
                 validateOutputName={_name => onValidateOutputFieldName(index, _name)}
                 viewExtendedProperties={viewExtendedProperties}
@@ -104,13 +100,12 @@ const OutputFieldsTable = (props: OutputFieldsTableProps) => {
             )}
             {selectedOutputIndex !== index && (
               <OutputFieldRow
-                key={index}
                 outputField={o}
                 onEditOutputField={() => onEdit(index)}
                 onDeleteOutputField={() => onDelete(index)}
               />
             )}
-          </article>
+          </RowWrapper>
         ))}
       </section>
       {outputs.length === 0 && (

@@ -15,3 +15,4 @@
  */
 
 export * from "./EditorHeader";
+export * from "./RowWrapper";
