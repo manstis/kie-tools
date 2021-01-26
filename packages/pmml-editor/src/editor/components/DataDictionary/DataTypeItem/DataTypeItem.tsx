@@ -19,7 +19,7 @@ import {
   TextInput
 } from "@patternfly/react-core";
 import { ArrowAltCircleRightIcon, TrashIcon } from "@patternfly/react-icons";
-import { DDDataField } from "../DataDictionaryContainer/DataDictionaryContainer";
+import { ConstraintType, DDDataField } from "../DataDictionaryContainer/DataDictionaryContainer";
 import "./DataTypeItem.scss";
 import ConstraintsLabel from "../ConstraintsLabel/ConstraintsLabel";
 import { Validated } from "../../../types";
@@ -88,7 +88,16 @@ const DataTypeItem = (props: DataTypeItemProps) => {
     if (value !== typeSelection) {
       setTypeSelection(value as DDDataField["type"]);
       setIsTypeSelectOpen(false);
-      onSave({ name: name.trim(), type: value as DDDataField["type"], optype: optypeSelection }, index);
+      const updatedItem: DDDataField = { ...dataType, type: value as DDDataField["type"] };
+      if (value === "string" && optypeSelection === "ordinal") {
+        if (updatedItem.constraints?.type !== ConstraintType.ENUMERATION) {
+          updatedItem.constraints = {
+            type: ConstraintType.ENUMERATION,
+            value: [""]
+          };
+        }
+      }
+      onSave(updatedItem, index);
     }
   };
 
@@ -100,12 +109,23 @@ const DataTypeItem = (props: DataTypeItemProps) => {
     if (value !== optypeSelection) {
       setOptypeSelection(value as DDDataField["optype"]);
       setIsOptypeSelectOpen(false);
-      onSave({ name: name.trim(), type: typeSelection, optype: value as DDDataField["optype"] }, index);
+      const updatedItem: DDDataField = { ...dataType, optype: value as DDDataField["optype"] };
+      if ((value === "ordinal" && typeSelection === "string") || (value === "ordinal" && dataType.isCyclic)) {
+        if (updatedItem.constraints?.type !== ConstraintType.ENUMERATION) {
+          updatedItem.constraints = {
+            type: ConstraintType.ENUMERATION,
+            value: [""]
+          };
+        }
+      }
+      if (value === "categorical" && dataType.isCyclic !== undefined) {
+        delete updatedItem.isCyclic;
+      }
+      onSave(updatedItem, index);
     }
   };
 
   const handleEditStatus = () => {
-    console.log("set edit status");
     onEdit?.(index);
   };
 
@@ -115,8 +135,9 @@ const DataTypeItem = (props: DataTypeItemProps) => {
   };
 
   const handleNameSave = () => {
-    if (name.trim().length === 0) {
+    if (name.trim().length === 0 || validation !== "success") {
       setName(dataType.name);
+      setValidation("default");
     } else if (name !== dataType.name) {
       handleSave();
     }
@@ -150,6 +171,11 @@ const DataTypeItem = (props: DataTypeItemProps) => {
       input?.focus();
       if (name.startsWith("New Data Type")) {
         input?.select();
+      }
+    } else {
+      if (validation !== "success") {
+        setName(dataType.name);
+        setValidation("default");
       }
     }
   }, [editingIndex]);
@@ -217,6 +243,7 @@ const DataTypeItem = (props: DataTypeItemProps) => {
                             isOpen={isTypeSelectOpen}
                             placeholder="Type"
                             className="data-type-item__type-select"
+                            menuAppendTo={"parent"}
                           >
                             {typeOptions.map((option, optionIndex) => (
                               <SelectOption
@@ -240,6 +267,7 @@ const DataTypeItem = (props: DataTypeItemProps) => {
                             isOpen={isOptypeSelectOpen}
                             placeholder="Op Type"
                             className="data-type-item__type-select"
+                            menuAppendTo={"parent"}
                           >
                             {optypeOptions.map((option, optionIndex) => (
                               <SelectOption
@@ -262,16 +290,15 @@ const DataTypeItem = (props: DataTypeItemProps) => {
                           editingIndex={editingIndex}
                           onPropertyDelete={handlePropertiesDelete}
                         />
-                        {dataType.constraints !== undefined && (
-                          <ConstraintsLabel
-                            editingIndex={editingIndex}
-                            constraints={dataType.constraints}
-                            onConstraintsDelete={handleConstraintsDelete}
-                          />
-                        )}
+                        <ConstraintsLabel
+                          dataType={dataType}
+                          dataTypeIndex={index}
+                          editMode={true}
+                          onConstraintsDelete={handleConstraintsDelete}
+                        />
                         <Label
                           variant="outline"
-                          color="orange"
+                          color="cyan"
                           href="#"
                           icon={<ArrowAltCircleRightIcon />}
                           onClick={event => {
@@ -328,7 +355,7 @@ const DataTypeItem = (props: DataTypeItemProps) => {
                 {optypeSelection}
               </Label>{" "}
               <PropertiesLabels dataType={dataType} />
-              {dataType.constraints !== undefined && <ConstraintsLabel constraints={dataType.constraints} />}
+              <ConstraintsLabel dataType={dataType} dataTypeIndex={index} />
             </SplitItem>
             <SplitItem>
               <Button variant="plain" onClick={handleDelete}>
