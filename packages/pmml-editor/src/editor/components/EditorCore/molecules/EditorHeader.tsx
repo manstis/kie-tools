@@ -21,6 +21,7 @@ import { OutputsHandler } from "../../Outputs/organisms";
 import { FieldName, MiningSchema, Output, OutputField } from "@kogito-tooling/pmml-editor-marshaller";
 import MiningSchemaHandler from "../../MiningSchema/MiningSchemaHandler/MiningSchemaHandler";
 import "./EditorHeader.scss";
+import { Button } from "@patternfly/react-core/dist/js/components/Button";
 
 interface EditorHeaderViewerProps {
   modelName: string;
@@ -56,7 +57,8 @@ export const EditorHeader = (props: EditorHeaderProps) => {
         </SplitItem>
         <SplitItem isFilled={true} />
         <SplitItem>
-          <DataDictionaryHandler />
+          {/*<DataDictionaryHandler />*/}
+          <Button isDisabled={true}>Data Dictionary</Button>
         </SplitItem>
         <SplitItem>
           <MiningSchemaHandler miningSchema={miningSchema} modelIndex={modelIndex} />

@@ -16,6 +16,7 @@ import { useBatchDispatch, useHistoryService } from "../../../history";
 import { useValidationRegistry } from "../../../validation";
 import { Builder } from "../../../paths";
 import { ValidationIndicatorTooltip } from "../../EditorCore/atoms";
+import DataDictionaryContainerReloaded from "../DataDictionaryContainer/DataDictionaryContainerReloaded";
 
 const DataDictionaryHandler = () => {
   const [isDataDictionaryOpen, setIsDataDictionaryOpen] = useState(false);
@@ -91,65 +92,35 @@ const DataDictionaryHandler = () => {
   const { validationRegistry } = useValidationRegistry();
   const validations = useMemo(() => validationRegistry.get(Builder().forDataDictionary().build()), [dictionary]);
 
-  const header = (
-    <Split hasGutter={true}>
-      <SplitItem isFilled={true}>
-        <Title headingLevel="h1" size={TitleSizes["2xl"]}>
-          Data Dictionary
-        </Title>
-      </SplitItem>
-      <SplitItem>
-        <Button
-          type="button"
-          variant={ButtonVariant.plain}
-          onClick={handleDataDictionaryToggle}
-          data-title="DataDictionaryModalClose"
-        >
-          <CloseIcon />
-        </Button>
-      </SplitItem>
-    </Split>
-  );
-
   return (
     <>
-      {validations.length === 0 && (
-        <Button variant="secondary" onClick={handleDataDictionaryToggle} data-title="DataDictionary">
-          Set Data Dictionary
-        </Button>
-      )}
-      {validations.length > 0 && (
-        <ValidationIndicatorTooltip validations={validations}>
-          <Button
-            variant="secondary"
-            icon={<WarningTriangleIcon size={"sm"} color={"orange"} />}
-            onClick={handleDataDictionaryToggle}
-            data-title="DataDictionary"
-          >
-            Set Data Dictionary
-          </Button>
-        </ValidationIndicatorTooltip>
-      )}
-      <Modal
-        aria-label="data-dictionary"
-        title="Data Dictionary"
-        header={header}
-        isOpen={isDataDictionaryOpen}
-        showClose={false}
-        variant={ModalVariant.large}
-        onEscapePress={() => false}
-        data-title="DataDictionaryModal"
-      >
-        <DataDictionaryContainer
-          dataDictionary={dictionary}
-          onAdd={addField}
-          onEdit={updateField}
-          onDelete={deleteField}
-          onReorder={reorderFields}
-          onBatchAdd={addBatchFields}
-          onEditingPhaseChange={handleEditingPhase}
-        />
-      </Modal>
+      {/*{validations.length === 0 && (*/}
+      {/*  <Button variant="secondary" onClick={handleDataDictionaryToggle} data-title="DataDictionary">*/}
+      {/*    Set Data Dictionary*/}
+      {/*  </Button>*/}
+      {/*)}*/}
+      {/*{validations.length > 0 && (*/}
+      {/*  <ValidationIndicatorTooltip validations={validations}>*/}
+      {/*    <Button*/}
+      {/*      variant="secondary"*/}
+      {/*      icon={<WarningTriangleIcon size={"sm"} color={"orange"} />}*/}
+      {/*      onClick={handleDataDictionaryToggle}*/}
+      {/*      data-title="DataDictionary"*/}
+      {/*    >*/}
+      {/*      Set Data Dictionary*/}
+      {/*    </Button>*/}
+      {/*  </ValidationIndicatorTooltip>*/}
+      {/*)}*/}
+
+      <DataDictionaryContainerReloaded
+        dataDictionary={dictionary}
+        onAdd={addField}
+        onEdit={updateField}
+        onDelete={deleteField}
+        onReorder={reorderFields}
+        onBatchAdd={addBatchFields}
+        onEditingPhaseChange={handleEditingPhase}
+      />
     </>
   );
 };

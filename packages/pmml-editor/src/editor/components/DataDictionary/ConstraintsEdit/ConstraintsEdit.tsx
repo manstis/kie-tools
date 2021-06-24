@@ -225,9 +225,10 @@ const ConstraintsEdit = (props: ConstraintsEditProps) => {
             isOpen={typeSelectIsOpen}
             placeholderText={"Select a type"}
             isDisabled={enabledTypeOptionsCount === 1}
+            menuAppendTo={"parent"}
           >
             {typeOptions.map((item, index) => (
-              <SelectOption key={index} value={item.value} isDisabled={item.disabled}>
+              <SelectOption key={index} value={item.value} isDisabled={item.disabled} className="ignore-onclickoutside">
                 {item.label}
               </SelectOption>
             ))}

@@ -30,6 +30,13 @@ import { ArrowAltCircleLeftIcon } from "@patternfly/react-icons/dist/js/icons/ar
 import { ConstraintType, DDDataField } from "../DataDictionaryContainer/DataDictionaryContainer";
 import ConstraintsEdit from "../ConstraintsEdit/ConstraintsEdit";
 import "./DataDictionaryPropertiesEdit.scss";
+import {
+  Select,
+  SelectOption,
+  SelectOptionObject,
+  SelectVariant,
+} from "@patternfly/react-core/dist/js/components/Select";
+import { Flex, FlexItem } from "@patternfly/react-core/dist/js/layouts/Flex";
 
 interface DataDictionaryPropertiesEditProps {
   dataType: DDDataField;
@@ -40,12 +47,28 @@ interface DataDictionaryPropertiesEditProps {
 
 const DataDictionaryPropertiesEdit = (props: DataDictionaryPropertiesEditProps) => {
   const { dataType, dataFieldIndex, onClose, onSave } = props;
+  const [name, setName] = useState(dataType.name ?? "");
+  const [typeSelection, setTypeSelection] = useState<DDDataField["type"]>(dataType.type);
+  const [isTypeSelectOpen, setIsTypeSelectOpen] = useState(false);
   const [displayName, setDisplayName] = useState(dataType.displayName ?? "");
   const [isCyclic, setIsCyclic] = useState(dataType.isCyclic);
   const [missingValue, setMissingValue] = useState(dataType.missingValue ?? "");
   const [invalidValue, setInvalidValue] = useState(dataType.invalidValue ?? "");
+  const typeOptions = [
+    { value: "string" },
+    { value: "integer" },
+    { value: "float" },
+    { value: "double" },
+    { value: "boolean" },
+  ];
+  const [optypeSelection, setOptypeSelection] = useState(dataType.optype);
+  const [isOptypeSelectOpen, setIsOptypeSelectOpen] = useState(false);
+  const optypeOptions = [{ value: "categorical" }, { value: "ordinal" }, { value: "continuous" }];
 
   useEffect(() => {
+    setName(dataType.name);
+    setTypeSelection(dataType.type);
+    setOptypeSelection(dataType.optype);
     setDisplayName(dataType.displayName ?? "");
     setIsCyclic(dataType.isCyclic);
     setMissingValue(dataType.missingValue ?? "");
@@ -75,18 +98,124 @@ const DataDictionaryPropertiesEdit = (props: DataDictionaryPropertiesEditProps) 
     }
   }, [dataType]);
 
+  const handleNameChange = (value: string) => {
+    setName(value);
+    // setValidation(onValidate(value) ? "default" : "error");
+  };
+
+  const handleNameSave = () => {
+    // if (validation === "error") {
+    //   setName(dataType.name);
+    //   setValidation("default");
+    // } else if (name !== dataType.name) {
+    //   handleSave();
+    // }
+    onSave({
+      name,
+    });
+  };
+
+  const typeToggle = (isOpen: boolean) => {
+    setIsTypeSelectOpen(isOpen);
+  };
+
+  const typeSelect = (event: React.MouseEvent | React.ChangeEvent, value: string | SelectOptionObject) => {
+    if (value !== typeSelection) {
+      setTypeSelection(value as DDDataField["type"]);
+      setIsTypeSelectOpen(false);
+      onSave({ type: value as DDDataField["type"] });
+    }
+  };
+
+  const optypeToggle = (isOpen: boolean) => {
+    setIsOptypeSelectOpen(isOpen);
+  };
+
+  const optypeSelect = (event: React.MouseEvent | React.ChangeEvent, value: string | SelectOptionObject) => {
+    if (value !== optypeSelection) {
+      setOptypeSelection(value as DDDataField["optype"]);
+      setIsOptypeSelectOpen(false);
+      onSave({ optype: value as DDDataField["optype"] });
+    }
+  };
+
   return (
-    <Stack hasGutter={true} className="data-dictionary__properties-edit">
-      <StackItem>
-        <Title headingLevel="h4" size={TitleSizes.xl}>
-          <Button variant="link" isInline={true} onClick={onClose}>
-            {dataType.name}
-          </Button>
-          &nbsp;/&nbsp;Properties
-        </Title>
-      </StackItem>
-      <StackItem className="data-dictionary__properties-edit__form-container">
+    <section className="data-dictionary__properties-edit ignore-onclickoutside">
+      <div className="data-dictionary__properties-edit__form-container">
         <Form className="data-dictionary__properties-edit__form">
+          <Flex>
+            <FlexItem>
+              <FormGroup
+                fieldId="name"
+                label="Name"
+                helperTextInvalid="Name is mandatory and must be unique"
+                // helperTextInvalidIcon={<ExclamationCircleIcon />}
+                // validated={validation}
+                style={{ width: 320 }}
+                isRequired={true}
+              >
+                <TextInput
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={name}
+                  onChange={handleNameChange}
+                  placeholder="Name"
+                  // validated={validation}
+                  onBlur={handleNameSave}
+                  autoComplete="off"
+                />
+              </FormGroup>
+            </FlexItem>
+            <FlexItem>
+              <FormGroup fieldId="type" label="Type" isRequired={true}>
+                <Select
+                  id="type"
+                  variant={SelectVariant.single}
+                  aria-label="Select Input Type"
+                  onToggle={typeToggle}
+                  onSelect={typeSelect}
+                  selections={typeSelection}
+                  isOpen={isTypeSelectOpen}
+                  placeholder="Type"
+                  className="data-type-item__type-select"
+                  menuAppendTo={"parent"}
+                >
+                  {typeOptions.map((option, optionIndex) => (
+                    <SelectOption
+                      key={optionIndex}
+                      value={option.value}
+                      className="ignore-onclickoutside data-type-item__type-select__option"
+                    />
+                  ))}
+                </Select>
+              </FormGroup>
+            </FlexItem>
+            <FlexItem>
+              <FormGroup fieldId="optype" label="Op Type" isRequired={true}>
+                <Select
+                  id="optype"
+                  variant={SelectVariant.single}
+                  aria-label="Select Op Type"
+                  onToggle={optypeToggle}
+                  onSelect={optypeSelect}
+                  selections={optypeSelection}
+                  isOpen={isOptypeSelectOpen}
+                  placeholder="Op Type"
+                  className="data-type-item__type-select"
+                  menuAppendTo={"parent"}
+                >
+                  {optypeOptions.map((option, optionIndex) => (
+                    <SelectOption
+                      key={optionIndex}
+                      value={option.value}
+                      className="ignore-onclickoutside data-type-item__type-select__option"
+                    />
+                  ))}
+                </Select>
+              </FormGroup>
+            </FlexItem>
+          </Flex>
           <Split hasGutter={true}>
             <SplitItem className="data-dictionary__properties-edit__form__left-column">
               <Stack hasGutter={true}>
@@ -233,13 +362,8 @@ const DataDictionaryPropertiesEdit = (props: DataDictionaryPropertiesEditProps) 
             </SplitItem>
           </Split>
         </Form>
-      </StackItem>
-      <StackItem>
-        <Button variant="primary" onClick={onClose} icon={<ArrowAltCircleLeftIcon />} iconPosition="left">
-          Back
-        </Button>
-      </StackItem>
-    </Stack>
+      </div>
+    </section>
   );
 };
 

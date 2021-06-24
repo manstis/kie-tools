@@ -16,6 +16,7 @@
 
 .data-dictionary {
   &__properties-edit {
+    height: 100%;
     &__form-container {
       height: 100%;
       overflow-y: auto;
@@ -32,7 +33,7 @@
       margin-top: var(--pf-global--spacer--lg);
     }
     &__field {
-      width: 320px;
+      //width: 320px;
     }
   }
   &__constraints-section {

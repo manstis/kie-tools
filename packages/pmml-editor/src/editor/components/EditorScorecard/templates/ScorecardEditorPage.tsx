@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 import * as React from "react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { PageSection, PageSectionVariants } from "@patternfly/react-core/dist/js/components/Page";
+import { Tabs, Tab, TabTitleIcon, TabTitleText } from "@patternfly/react-core";
+import { ListIcon, WaveSquareIcon } from "@patternfly/react-icons";
 import { EditorHeader } from "../../EditorCore/molecules";
 import {
   Characteristics,
@@ -31,9 +33,10 @@ import { CharacteristicsContainer, CorePropertiesTable } from "../organisms";
 import { getModelName } from "../../..";
 import { Actions } from "../../../reducers";
 import { useSelector } from "react-redux";
-import "./ScorecardEditorPage.scss";
 import { EmptyStateModelNotFound } from "../../EditorCore/organisms";
 import { useBatchDispatch, useHistoryService } from "../../../history";
+import "./ScorecardEditorPage.scss";
+import DataDictionaryHandler from "../../DataDictionary/DataDictionaryHandler/DataDictionaryHandler";
 
 interface ScorecardEditorPageProps {
   path: string;
@@ -155,6 +158,12 @@ export const ScorecardEditorPage = (props: ScorecardEditorPageProps) => {
     [modelIndex]
   );
 
+  const [activeTabKey, setActiveTabKey] = useState(0);
+
+  const handleTabClick = (event: React.MouseEvent<HTMLElement, MouseEvent>, tabIndex: number) => {
+    setActiveTabKey(tabIndex);
+  };
+
   return (
     <div data-testid="editor-page" className={"editor"}>
       {!model && <EmptyStateModelNotFound />}
@@ -196,13 +205,45 @@ export const ScorecardEditorPage = (props: ScorecardEditorPageProps) => {
               </PageSection>
 
               <PageSection isFilled={true} style={{ paddingTop: "0px" }}>
-                <PageSection variant={PageSectionVariants.light} style={{ height: "100%" }}>
-                  <CharacteristicsContainer
-                    modelIndex={modelIndex}
-                    areReasonCodesUsed={model.useReasonCodes ?? true}
-                    scorecardBaselineScore={model.baselineScore}
-                    characteristics={characteristics?.Characteristic ?? []}
-                  />
+                <PageSection
+                  variant={PageSectionVariants.light}
+                  style={{ height: "100%", display: "flex", flexDirection: "column" }}
+                >
+                  <Tabs activeKey={activeTabKey} onSelect={handleTabClick}>
+                    <Tab
+                      className="editor__body__tab"
+                      eventKey={0}
+                      title={
+                        <>
+                          <TabTitleIcon>
+                            <WaveSquareIcon />
+                          </TabTitleIcon>{" "}
+                          <TabTitleText>Characteristics</TabTitleText>{" "}
+                        </>
+                      }
+                    >
+                      <CharacteristicsContainer
+                        modelIndex={modelIndex}
+                        areReasonCodesUsed={model.useReasonCodes ?? true}
+                        scorecardBaselineScore={model.baselineScore}
+                        characteristics={characteristics?.Characteristic ?? []}
+                      />
+                    </Tab>
+                    <Tab
+                      className="editor__body__tab"
+                      eventKey={1}
+                      title={
+                        <>
+                          <TabTitleIcon>
+                            <ListIcon />
+                          </TabTitleIcon>{" "}
+                          <TabTitleText>Data Types</TabTitleText>{" "}
+                        </>
+                      }
+                    >
+                      <DataDictionaryHandler />
+                    </Tab>
+                  </Tabs>
                 </PageSection>
               </PageSection>
             </div>

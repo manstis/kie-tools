@@ -39,11 +39,16 @@ export const CharacteristicsToolbar = (props: CharacteristicsToolbarProps) => {
       <ToolbarContent>
         <Split hasGutter={true} style={{ width: "100%" }}>
           <SplitItem>
-            <TextContent>
-              <Title size="lg" headingLevel="h1">
-                Characteristics
-              </Title>
-            </TextContent>
+            <ToolbarItem>
+              <Button
+                id="add-characteristic-button"
+                data-testid="characteristics-toolbar__add-characteristic"
+                variant="primary"
+                onClick={() => onAddCharacteristic()}
+              >
+                Add Characteristic
+              </Button>
+            </ToolbarItem>
           </SplitItem>
           <SplitItem isFilled={true} />
           <SplitItem>
@@ -74,18 +79,6 @@ export const CharacteristicsToolbar = (props: CharacteristicsToolbarProps) => {
                   </span>
                 </form>
               </InputGroup>
-            </ToolbarItem>
-          </SplitItem>
-          <SplitItem>
-            <ToolbarItem>
-              <Button
-                id="add-characteristic-button"
-                data-testid="characteristics-toolbar__add-characteristic"
-                variant="primary"
-                onClick={() => onAddCharacteristic()}
-              >
-                Add Characteristic
-              </Button>
             </ToolbarItem>
           </SplitItem>
         </Split>

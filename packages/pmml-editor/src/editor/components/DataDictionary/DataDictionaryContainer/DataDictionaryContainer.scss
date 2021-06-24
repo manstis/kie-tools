@@ -1,5 +1,6 @@
 .data-dictionary {
-  height: 60vh;
+  height: 100%;
+  padding-top: var(--pf-global--spacer--sm);
 
   &__toolbar {
     padding: 1em 0;

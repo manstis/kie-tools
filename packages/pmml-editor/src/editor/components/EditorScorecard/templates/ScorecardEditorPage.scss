@@ -46,6 +46,10 @@
       flex-direction: column;
       justify-content: stretch;
     }
+    &__tab {
+      height: 100%;
+      flex-grow: 1;
+    }
   }
 }
 
