@@ -6,6 +6,7 @@ import { Stack, StackItem } from "@patternfly/react-core/dist/js/layouts/Stack";
 import { ActionGroup, Form, FormGroup } from "@patternfly/react-core/dist/js/components/Form";
 import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea";
 import "./MultipleDataTypesAdd.scss";
+import { Modal, ModalVariant } from "@patternfly/react-core/dist/js/components/Modal";
 
 interface MultipleDataTypeAddProps {
   onAdd: (types: string) => void;
@@ -33,16 +34,29 @@ const MultipleDataTypeAdd = ({ onAdd, onCancel }: MultipleDataTypeAddProps) => {
   const handleSubmit = (event: React.FormEvent) => {
     if (validateInput() === "success") {
       onAdd(input);
+      onCancel();
     }
     event.preventDefault();
   };
 
   return (
-    <section>
+    <Modal
+      variant={ModalVariant.medium}
+      title="Add Multiple Data Types"
+      isOpen={true}
+      onClose={onCancel}
+      actions={[
+        <Button key="confirm" variant="primary" onClick={handleSubmit}>
+          Add them
+        </Button>,
+        <Button key="cancel" variant="link" onClick={onCancel}>
+          Cancel
+        </Button>,
+      ]}
+    >
       <Stack hasGutter={true}>
         <StackItem>
           <TextContent>
-            <Text component={TextVariants.h3}>Add Multiple Data Types</Text>
             <Text component={TextVariants.p}>
               You can add multiple data types by entering their names below. Add them one per line.
               <br />
@@ -69,18 +83,10 @@ const MultipleDataTypeAdd = ({ onAdd, onCancel }: MultipleDataTypeAddProps) => {
                 placeholder={"First Data Type\nSecond Data Type\n..."}
               />
             </FormGroup>
-            <ActionGroup>
-              <Button variant="primary" type="submit">
-                Add Them
-              </Button>
-              <Button variant="link" onClick={() => onCancel()}>
-                Never mind
-              </Button>
-            </ActionGroup>
           </Form>
         </StackItem>
       </Stack>
-    </section>
+    </Modal>
   );
 };
 

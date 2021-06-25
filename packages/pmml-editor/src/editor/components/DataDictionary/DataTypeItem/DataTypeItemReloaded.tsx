@@ -18,21 +18,10 @@ import * as React from "react";
 import { BaseSyntheticEvent, useEffect, useMemo, useState } from "react";
 import useOnclickOutside from "react-cool-onclickoutside";
 import { Button } from "@patternfly/react-core/dist/js/components/Button";
-import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
 import { Flex, FlexItem } from "@patternfly/react-core/dist/js/layouts/Flex";
-import { Stack, StackItem } from "@patternfly/react-core/dist/js/layouts/Stack";
 import { Split, SplitItem } from "@patternfly/react-core/dist/js/layouts/Split";
-import { Form, FormGroup } from "@patternfly/react-core/dist/js/components/Form";
-import {
-  Select,
-  SelectOption,
-  SelectOptionObject,
-  SelectVariant,
-} from "@patternfly/react-core/dist/js/components/Select";
 import { Label } from "@patternfly/react-core/dist/js/components/Label";
 import { TrashIcon } from "@patternfly/react-icons/dist/js/icons/trash-icon";
-import { ArrowAltCircleRightIcon } from "@patternfly/react-icons/dist/js/icons/arrow-alt-circle-right-icon";
-import { ExclamationCircleIcon } from "@patternfly/react-icons/dist/js/icons/exclamation-circle-icon";
 import { DDDataField } from "../DataDictionaryContainer/DataDictionaryContainer";
 import "./DataTypeItem.scss";
 import ConstraintsLabel from "../ConstraintsLabel/ConstraintsLabel";
@@ -49,38 +38,27 @@ interface DataTypeItemProps {
   onSave: (dataType: DDDataField, index: number | null) => void;
   onEdit?: (index: number) => void;
   onDelete?: (index: number) => void;
-  onConstraintsEdit: (dataType: DDDataField) => void;
   onConstraintsSave: (dataType: DDDataField) => void;
   onValidate: (dataTypeName: string) => boolean;
   onOutsideClick: () => void;
 }
 
 const DataTypeItem = (props: DataTypeItemProps) => {
-  const {
-    dataType,
-    index,
-    editingIndex,
-    onSave,
-    onEdit,
-    onDelete,
-    onConstraintsEdit,
-    onConstraintsSave,
-    onValidate,
-    onOutsideClick,
-  } = props;
+  const { dataType, index, editingIndex, onSave, onEdit, onDelete, onConstraintsSave, onValidate, onOutsideClick } =
+    props;
   const [name, setName] = useState(dataType.name);
   const [typeSelection, setTypeSelection] = useState<DDDataField["type"]>(dataType.type);
-  const [isTypeSelectOpen, setIsTypeSelectOpen] = useState(false);
-  const typeOptions = [
-    { value: "string" },
-    { value: "integer" },
-    { value: "float" },
-    { value: "double" },
-    { value: "boolean" },
-  ];
+  // const [isTypeSelectOpen, setIsTypeSelectOpen] = useState(false);
+  // const typeOptions = [
+  //   { value: "string" },
+  //   { value: "integer" },
+  //   { value: "float" },
+  //   { value: "double" },
+  //   { value: "boolean" },
+  // ];
   const [optypeSelection, setOptypeSelection] = useState(dataType.optype);
-  const [isOptypeSelectOpen, setIsOptypeSelectOpen] = useState(false);
-  const optypeOptions = [{ value: "categorical" }, { value: "ordinal" }, { value: "continuous" }];
+  // const [isOptypeSelectOpen, setIsOptypeSelectOpen] = useState(false);
+  // const optypeOptions = [{ value: "categorical" }, { value: "ordinal" }, { value: "continuous" }];
   const [validation, setValidation] = useState<Validated>("default");
 
   const ref = useOnclickOutside(
@@ -90,34 +68,34 @@ const DataTypeItem = (props: DataTypeItemProps) => {
     { eventTypes: ["click"], disabled: editingIndex !== index }
   );
 
-  const handleNameChange = (value: string) => {
-    setName(value);
-    setValidation(onValidate(value) ? "default" : "error");
-  };
-
-  const typeToggle = (isOpen: boolean) => {
-    setIsTypeSelectOpen(isOpen);
-  };
-
-  const typeSelect = (event: React.MouseEvent | React.ChangeEvent, value: string | SelectOptionObject) => {
-    if (value !== typeSelection) {
-      setTypeSelection(value as DDDataField["type"]);
-      setIsTypeSelectOpen(false);
-      onSave({ ...dataType, type: value as DDDataField["type"] }, index);
-    }
-  };
-
-  const optypeToggle = (isOpen: boolean) => {
-    setIsOptypeSelectOpen(isOpen);
-  };
-
-  const optypeSelect = (event: React.MouseEvent | React.ChangeEvent, value: string | SelectOptionObject) => {
-    if (value !== optypeSelection) {
-      setOptypeSelection(value as DDDataField["optype"]);
-      setIsOptypeSelectOpen(false);
-      onSave({ ...dataType, optype: value as DDDataField["optype"] }, index);
-    }
-  };
+  // const handleNameChange = (value: string) => {
+  //   setName(value);
+  //   setValidation(onValidate(value) ? "default" : "error");
+  // };
+  //
+  // const typeToggle = (isOpen: boolean) => {
+  //   setIsTypeSelectOpen(isOpen);
+  // };
+  //
+  // const typeSelect = (event: React.MouseEvent | React.ChangeEvent, value: string | SelectOptionObject) => {
+  //   if (value !== typeSelection) {
+  //     setTypeSelection(value as DDDataField["type"]);
+  //     setIsTypeSelectOpen(false);
+  //     onSave({ ...dataType, type: value as DDDataField["type"] }, index);
+  //   }
+  // };
+  //
+  // const optypeToggle = (isOpen: boolean) => {
+  //   setIsOptypeSelectOpen(isOpen);
+  // };
+  //
+  // const optypeSelect = (event: React.MouseEvent | React.ChangeEvent, value: string | SelectOptionObject) => {
+  //   if (value !== optypeSelection) {
+  //     setOptypeSelection(value as DDDataField["optype"]);
+  //     setIsOptypeSelectOpen(false);
+  //     onSave({ ...dataType, optype: value as DDDataField["optype"] }, index);
+  //   }
+  // };
 
   const handleEditStatus = (event: BaseSyntheticEvent) => {
     event.preventDefault();
@@ -147,9 +125,9 @@ const DataTypeItem = (props: DataTypeItemProps) => {
     }
   };
 
-  const handleConstraints = () => {
-    onConstraintsEdit({ ...dataType, name, type: typeSelection });
-  };
+  // const handleConstraints = () => {
+  //   onConstraintsEdit({ ...dataType, name, type: typeSelection });
+  // };
 
   const handleConstraintsDelete = () => {
     const updatedDataType = { ...dataType };
@@ -225,6 +203,11 @@ const DataTypeItem = (props: DataTypeItemProps) => {
                 editMode={true}
                 onConstraintsDelete={handleConstraintsDelete}
               />
+            </SplitItem>
+            <SplitItem>
+              <Button variant="plain" onClick={handleDelete}>
+                <TrashIcon />
+              </Button>
             </SplitItem>
           </Split>
         </section>

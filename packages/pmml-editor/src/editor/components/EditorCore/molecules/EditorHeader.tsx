@@ -58,7 +58,7 @@ export const EditorHeader = (props: EditorHeaderProps) => {
         <SplitItem isFilled={true} />
         <SplitItem>
           {/*<DataDictionaryHandler />*/}
-          <Button isDisabled={true}>Data Dictionary</Button>
+          <Button isDisabled={true}>Set Data Dictionary</Button>
         </SplitItem>
         <SplitItem>
           <MiningSchemaHandler miningSchema={miningSchema} modelIndex={modelIndex} />
