@@ -237,7 +237,7 @@ export const ScorecardEditorPage = (props: ScorecardEditorPageProps) => {
                           <TabTitleIcon>
                             <ListIcon />
                           </TabTitleIcon>{" "}
-                          <TabTitleText>Data Types</TabTitleText>{" "}
+                          <TabTitleText>Data Dictionary</TabTitleText>{" "}
                         </>
                       }
                     >

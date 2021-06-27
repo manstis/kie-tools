@@ -24,7 +24,7 @@ import { SortIcon } from "@patternfly/react-icons/dist/js/icons/sort-icon";
 import { PlusIcon } from "@patternfly/react-icons/dist/js/icons/plus-icon";
 import { BoltIcon } from "@patternfly/react-icons/dist/js/icons/bolt-icon";
 import { Drawer, DrawerContent, DrawerContentBody, DrawerPanelContent, DrawerPanelBody } from "@patternfly/react-core";
-import DataTypeItem from "../DataTypeItem/DataTypeItem";
+import { OutlinedHandPointLeftIcon } from "@patternfly/react-icons";
 import MultipleDataTypeAdd from "../MultipleDataTypeAdd/MultipleDataTypeAdd";
 import DataTypesSort from "../DataTypesSort/DataTypesSort";
 import EmptyDataDictionary from "../EmptyDataDictionary/EmptyDataDictionary";
@@ -114,13 +114,13 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
     setViewSection("main");
   };
 
-  const handleConstraintsEdit = (dataType: DDDataField) => {
-    if (editing !== undefined) {
-      setEditingDataType(dataType);
-      setViewSection("properties");
-      onEditingPhaseChange(true);
-    }
-  };
+  // const handleConstraintsEdit = (dataType: DDDataField) => {
+  //   if (editing !== undefined) {
+  //     setEditingDataType(dataType);
+  //     setViewSection("properties");
+  //     onEditingPhaseChange(true);
+  //   }
+  // };
 
   const handleConstraintsSave = (payload: DDDataField) => {
     if (editing !== undefined) {
@@ -209,12 +209,20 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
               </Button>
             </FlexItem>
           </Flex>
-          <>
+          {dataTypes.length === 0 && (
+            <Bullseye style={{ height: "40vh" }}>
+              <EmptyDataDictionary />
+            </Bullseye>
+          )}
+          {dataTypes.length > 0 && (
             <Drawer isStatic isExpanded={true}>
               <DrawerContent
                 panelContent={
                   <DrawerPanelContent widths={{ default: "width_50" }}>
-                    <DrawerPanelBody hasNoPadding={true}>
+                    <DrawerPanelBody
+                      hasNoPadding={true}
+                      style={{ backgroundColor: "var(--pf-global--BackgroundColor--200)" }}
+                    >
                       {editingDataType ? (
                         <DataDictionaryPropertiesEdit
                           dataType={editingDataType}
@@ -223,9 +231,11 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
                           onSave={handlePropertiesSave}
                         />
                       ) : (
-                        <Bullseye>
-                          <div>Click on a data type to start editing it</div>
-                        </Bullseye>
+                        <section style={{ margin: "5em 0", textAlign: "center" }}>
+                          Click on a data type from the list to edit its properties
+                          <br />
+                          <OutlinedHandPointLeftIcon />
+                        </section>
                       )}
                     </DrawerPanelBody>
                   </DrawerPanelContent>
@@ -239,26 +249,23 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
                           <Alert variant="warning" isInline={true} title="Some items are invalid and need attention." />
                         </section>
                       )}
-                      <section className="data-dictionary__types-list">
-                        {dataTypes.length === 0 && (
-                          <Bullseye style={{ height: "40vh" }}>
-                            <EmptyDataDictionary />
-                          </Bullseye>
-                        )}
-                        {dataTypes.map((item, index) => (
-                          <DataTypeItemReloaded
-                            dataType={item}
-                            editingIndex={editing}
-                            index={index}
-                            key={index}
-                            onSave={handleSave}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                            onConstraintsSave={handleConstraintsSave}
-                            onValidate={dataTypeNameValidation}
-                            onOutsideClick={handleOutsideClick}
-                          />
-                        ))}
+                      <section className="data-dictionary__types-list-wrapper">
+                        <section className="data-dictionary__types-list">
+                          {dataTypes.map((item, index) => (
+                            <DataTypeItemReloaded
+                              dataType={item}
+                              editingIndex={editing}
+                              index={index}
+                              key={index}
+                              onSave={handleSave}
+                              onEdit={handleEdit}
+                              onDelete={handleDelete}
+                              onConstraintsSave={handleConstraintsSave}
+                              onValidate={dataTypeNameValidation}
+                              onOutsideClick={handleOutsideClick}
+                            />
+                          ))}
+                        </section>
                       </section>
                     </>
                   )}
@@ -270,9 +277,8 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
                 </DrawerContentBody>
               </DrawerContent>
             </Drawer>
-          </>
+          )}
         </section>
-
         {viewSection === "batch-add" && (
           <MultipleDataTypeAdd onAdd={handleMultipleAdd} onCancel={() => setViewSection("main")} />
         )}

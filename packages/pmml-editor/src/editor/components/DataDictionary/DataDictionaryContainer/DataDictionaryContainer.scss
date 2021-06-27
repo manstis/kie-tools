@@ -6,11 +6,24 @@
     padding: 1em 0;
   }
 
+  &__types-list-wrapper {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+  }
   &__types-list {
     flex: 1 1 0;
     overflow-y: auto;
     padding: 1em;
     background-color: var(--pf-global--BackgroundColor--200);
+    .editable-item {
+      transition: border 0.1s ease-in;
+
+      &--editing {
+        border: var(--pf-global--BorderWidth--lg) solid var(--pf-global--active-color--100);
+      }
+    }
   }
 
   &__validation-alert {
