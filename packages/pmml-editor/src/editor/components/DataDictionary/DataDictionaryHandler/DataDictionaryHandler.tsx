@@ -21,47 +21,67 @@ import DataDictionaryContainerReloaded from "../DataDictionaryContainer/DataDict
 const DataDictionaryHandler = () => {
   const [isDataDictionaryOpen, setIsDataDictionaryOpen] = useState(false);
   const pmmlDataDictionary = useSelector<PMML, DataDictionary | undefined>((state: PMML) => state.DataDictionary);
-  const dictionary = useMemo(() => convertPMML2DD(pmmlDataDictionary), [pmmlDataDictionary]);
+  const [dictionary, setDictionary] = useState(convertPMML2DD(pmmlDataDictionary));
   const { setActiveOperation } = useOperation();
 
   const { service, getCurrentState } = useHistoryService();
   const dispatch = useBatchDispatch(service, getCurrentState);
 
-  const handleDataDictionaryToggle = () => {
-    setActiveOperation(Operation.NONE);
-    setIsDataDictionaryOpen(!isDataDictionaryOpen);
-  };
+  // const handleDataDictionaryToggle = () => {
+  //   setActiveOperation(Operation.NONE);
+  //   setIsDataDictionaryOpen(!isDataDictionaryOpen);
+  // };
 
   const addField = (name: string, type: DDDataField["type"], optype: DDDataField["optype"]) => {
-    dispatch({
-      type: Actions.AddDataDictionaryField,
-      payload: {
-        name: name,
-        type: type,
-        optype: optype,
+    // dispatch({
+    //   type: Actions.AddDataDictionaryField,
+    //   payload: {
+    //     name: name,
+    //     type: type,
+    //     optype: optype,
+    //   },
+    // });
+    setDictionary((previousDictionary) => [
+      ...previousDictionary,
+      {
+        name,
+        type,
+        optype,
       },
-    });
+    ]);
   };
 
   const addBatchFields = (fields: string[]) => {
-    dispatch({
-      type: Actions.AddBatchDataDictionaryFields,
-      payload: {
-        dataDictionaryFields: fields,
-      },
+    // dispatch({
+    //   type: Actions.AddBatchDataDictionaryFields,
+    //   payload: {
+    //     dataDictionaryFields: fields,
+    //   },
+    // });
+    setDictionary((previousDictionary) => {
+      return [
+        ...previousDictionary,
+        ...fields.map((field) => ({
+          name: field,
+          type: "string" as DDDataField["type"],
+          optype: "categorical" as DDDataField["optype"],
+        })),
+      ];
     });
   };
 
   const deleteField = (index: number) => {
-    //See https://issues.redhat.com/browse/FAI-443
-    //if (window.confirm(`Delete Output "${dictionary[index].name}"?`)) {
-    dispatch({
-      type: Actions.DeleteDataDictionaryField,
-      payload: {
-        index,
-      },
-    });
-    // }
+    // dispatch({
+    //   type: Actions.DeleteDataDictionaryField,
+    //   payload: {
+    //     index,
+    //   },
+    // });
+    if (index >= 0 && index < dictionary.length) {
+      setDictionary((previousDictionary) => {
+        return previousDictionary.filter((field, fieldIndex) => fieldIndex !== index);
+      });
+    }
   };
 
   const reorderFields = (oldIndex: number, newIndex: number) => {
