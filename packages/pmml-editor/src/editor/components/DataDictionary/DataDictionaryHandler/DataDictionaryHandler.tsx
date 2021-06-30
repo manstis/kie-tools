@@ -9,14 +9,13 @@ import { CloseIcon } from "@patternfly/react-icons/dist/js/icons/close-icon";
 import { WarningTriangleIcon } from "@patternfly/react-icons/dist/js/icons/warning-triangle-icon";
 import { DataDictionary, FieldName, PMML } from "@kogito-tooling/pmml-editor-marshaller";
 import { Actions } from "../../../reducers";
-import DataDictionaryContainer, { DDDataField } from "../DataDictionaryContainer/DataDictionaryContainer";
 import { convertPMML2DD, convertToDataField } from "../dataDictionaryUtils";
 import { Operation, useOperation } from "../../EditorScorecard";
 import { useBatchDispatch, useHistoryService } from "../../../history";
 import { useValidationRegistry } from "../../../validation";
 import { Builder } from "../../../paths";
 import { ValidationIndicatorTooltip } from "../../EditorCore/atoms";
-import DataDictionaryContainerReloaded from "../DataDictionaryContainer/DataDictionaryContainerReloaded";
+import DataDictionaryContainer, { DDDataField } from "../DataDictionaryContainer/DataDictionaryContainer";
 
 const DataDictionaryHandler = () => {
   const [isDataDictionaryOpen, setIsDataDictionaryOpen] = useState(false);
@@ -94,15 +93,22 @@ const DataDictionaryHandler = () => {
     });
   };
 
-  const updateField = (index: number, originalName: string, field: DDDataField) => {
-    dispatch({
-      type: Actions.UpdateDataDictionaryField,
-      payload: {
-        dataDictionaryIndex: index,
-        dataField: convertToDataField(field),
-        originalName: originalName as FieldName,
-      },
-    });
+  const updateField = (index: number, originalName: string, updatedField: DDDataField) => {
+    // dispatch({
+    //   type: Actions.UpdateDataDictionaryField,
+    //   payload: {
+    //     dataDictionaryIndex: index,
+    //     dataField: convertToDataField(updatedField),
+    //     originalName: originalName as FieldName
+    //   }
+    // });
+    if (index >= 0 && index < dictionary.length) {
+      setDictionary((previousDictionary) => {
+        return previousDictionary.map((field, fieldIndex) => {
+          return fieldIndex !== index ? field : { ...updatedField };
+        });
+      });
+    }
   };
 
   const handleEditingPhase = (status: boolean) => {
@@ -132,7 +138,7 @@ const DataDictionaryHandler = () => {
       {/*  </ValidationIndicatorTooltip>*/}
       {/*)}*/}
 
-      <DataDictionaryContainerReloaded
+      <DataDictionaryContainer
         dataDictionary={dictionary}
         onAdd={addField}
         onEdit={updateField}

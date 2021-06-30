@@ -1,6 +1,21 @@
+/*
+ * Copyright 2021 Red Hat, Inc. and/or its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
-import { CSSTransition, SwitchTransition } from "react-transition-group";
 import { Button } from "@patternfly/react-core/dist/js/components/Button";
 import { Flex, FlexItem } from "@patternfly/react-core/dist/js/layouts/Flex";
 import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
@@ -8,16 +23,18 @@ import { Alert } from "@patternfly/react-core/dist/js/components/Alert";
 import { SortIcon } from "@patternfly/react-icons/dist/js/icons/sort-icon";
 import { PlusIcon } from "@patternfly/react-icons/dist/js/icons/plus-icon";
 import { BoltIcon } from "@patternfly/react-icons/dist/js/icons/bolt-icon";
-import DataTypeItem from "../DataTypeItem/DataTypeItem";
+import { Drawer, DrawerContent, DrawerContentBody, DrawerPanelContent, DrawerPanelBody } from "@patternfly/react-core";
+import { OutlinedHandPointLeftIcon } from "@patternfly/react-icons";
 import MultipleDataTypeAdd from "../MultipleDataTypeAdd/MultipleDataTypeAdd";
 import DataTypesSort from "../DataTypesSort/DataTypesSort";
 import EmptyDataDictionary from "../EmptyDataDictionary/EmptyDataDictionary";
 import { findIncrementalName } from "../../../PMMLModelHelper";
-import "./DataDictionaryContainer.scss";
 import DataDictionaryPropertiesEdit from "../DataDictionaryPropertiesEdit/DataDictionaryPropertiesEdit";
 import { isEqual } from "lodash";
 import { useValidationRegistry } from "../../../validation";
 import { Builder } from "../../../paths";
+import "./DataDictionaryContainer.scss";
+import DataTypeItemReloaded from "../DataTypeItem/DataTypeItemReloaded";
 
 interface DataDictionaryContainerProps {
   dataDictionary: DDDataField[];
@@ -47,7 +64,7 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
       onEditingPhaseChange(false);
     }
     // updating constraintsEdit when dictionary changes
-    if (viewSection === "properties" && editing !== undefined) {
+    if (editing !== undefined) {
       setEditingDataType(dataDictionary[editing]);
     }
     setDataTypes(dataDictionary);
@@ -55,6 +72,7 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
 
   const handleOutsideClick = () => {
     setEditing(undefined);
+    setEditingDataType(undefined);
     onEditingPhaseChange(false);
   };
 
@@ -86,6 +104,7 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
 
   const handleEdit = (index: number) => {
     setEditing(index);
+    // setEditingDataType(dataTypes[index]);
     onEditingPhaseChange(true);
   };
 
@@ -95,13 +114,13 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
     setViewSection("main");
   };
 
-  const handleConstraintsEdit = (dataType: DDDataField) => {
-    if (editing !== undefined) {
-      setEditingDataType(dataType);
-      setViewSection("properties");
-      onEditingPhaseChange(true);
-    }
-  };
+  // const handleConstraintsEdit = (dataType: DDDataField) => {
+  //   if (editing !== undefined) {
+  //     setEditingDataType(dataType);
+  //     setViewSection("properties");
+  //     onEditingPhaseChange(true);
+  //   }
+  // };
 
   const handleConstraintsSave = (payload: DDDataField) => {
     if (editing !== undefined) {
@@ -142,16 +161,6 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
     return isValid;
   };
 
-  const getTransition = (currentState: dataDictionarySection) => {
-    if (currentState === "main") {
-      return "data-dictionary__overview";
-    } else if (currentState === "batch-add") {
-      return "enter-from-above";
-    } else {
-      return "enter-from-right";
-    }
-  };
-
   const { validationRegistry } = useValidationRegistry();
   const validations = useRef(validationRegistry.get(Builder().forDataDictionary().build()));
   useEffect(() => {
@@ -162,105 +171,118 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
 
   return (
     <div className="data-dictionary">
-      <SwitchTransition mode={"out-in"}>
-        <CSSTransition
-          timeout={{
-            enter: 230,
-            exit: 100,
-          }}
-          classNames={getTransition(viewSection)}
-          key={viewSection}
-        >
-          <>
-            {viewSection === "main" && (
-              <section className="data-dictionary__overview">
-                <Flex className="data-dictionary__toolbar">
-                  <FlexItem>
-                    <Button
-                      variant="primary"
-                      onClick={addDataType}
-                      icon={<PlusIcon />}
-                      iconPosition="left"
-                      isDisabled={editing !== undefined || sorting}
+      <>
+        <section className="data-dictionary__overview">
+          <Flex className="data-dictionary__toolbar">
+            <FlexItem>
+              <Button
+                variant="primary"
+                onClick={addDataType}
+                icon={<PlusIcon />}
+                iconPosition="left"
+                isDisabled={sorting}
+                className="ignore-onclickoutside"
+              >
+                Add Data Type
+              </Button>
+            </FlexItem>
+            <FlexItem>
+              <Button
+                variant="secondary"
+                onClick={() => setViewSection("batch-add")}
+                icon={<BoltIcon />}
+                iconPosition="left"
+                isDisabled={sorting}
+              >
+                Add Multiple Data Types
+              </Button>
+            </FlexItem>
+            <FlexItem>
+              <Button
+                variant={sorting ? "primary" : "secondary"}
+                onClick={toggleSorting}
+                icon={<SortIcon />}
+                iconPosition="left"
+                isDisabled={editing !== undefined}
+              >
+                {sorting ? "End Ordering" : "Order"}
+              </Button>
+            </FlexItem>
+          </Flex>
+          {dataTypes.length === 0 && (
+            <Bullseye style={{ height: "40vh" }}>
+              <EmptyDataDictionary />
+            </Bullseye>
+          )}
+          {dataTypes.length > 0 && (
+            <Drawer isStatic isExpanded={true}>
+              <DrawerContent
+                panelContent={
+                  <DrawerPanelContent widths={{ default: "width_50" }}>
+                    <DrawerPanelBody
+                      hasNoPadding={true}
+                      style={{ backgroundColor: "var(--pf-global--BackgroundColor--200)" }}
                     >
-                      Add Data Type
-                    </Button>
-                  </FlexItem>
-                  <FlexItem>
-                    <Button
-                      variant="secondary"
-                      onClick={() => setViewSection("batch-add")}
-                      icon={<BoltIcon />}
-                      iconPosition="left"
-                      isDisabled={editing !== undefined || sorting}
-                    >
-                      Add Multiple Data Types
-                    </Button>
-                  </FlexItem>
-                  <FlexItem align={{ default: "alignRight" }}>
-                    <Button
-                      variant={sorting ? "primary" : "secondary"}
-                      onClick={toggleSorting}
-                      icon={<SortIcon />}
-                      iconPosition="left"
-                      isDisabled={editing !== undefined}
-                    >
-                      {sorting ? "End Ordering" : "Order"}
-                    </Button>
-                  </FlexItem>
-                </Flex>
-                {!sorting && (
-                  <>
-                    {validations.current && validations.current.length > 0 && (
-                      <section className="data-dictionary__validation-alert">
-                        <Alert variant="warning" isInline={true} title="Some items are invalid and need attention." />
-                      </section>
-                    )}
-                    <section className="data-dictionary__types-list">
-                      {dataTypes.length === 0 && (
-                        <Bullseye style={{ height: "40vh" }}>
-                          <EmptyDataDictionary />
-                        </Bullseye>
-                      )}
-                      {dataTypes.map((item, index) => (
-                        <DataTypeItem
-                          dataType={item}
-                          editingIndex={editing}
-                          index={index}
-                          key={index}
-                          onSave={handleSave}
-                          onEdit={handleEdit}
-                          onDelete={handleDelete}
-                          onConstraintsEdit={handleConstraintsEdit}
-                          onConstraintsSave={handleConstraintsSave}
-                          onValidate={dataTypeNameValidation}
-                          onOutsideClick={handleOutsideClick}
+                      {editingDataType ? (
+                        <DataDictionaryPropertiesEdit
+                          dataType={editingDataType}
+                          dataFieldIndex={editing}
+                          onClose={exitFromPropertiesEdit}
+                          onSave={handlePropertiesSave}
                         />
-                      ))}
+                      ) : (
+                        <section style={{ margin: "5em 0", textAlign: "center" }}>
+                          Click on a data type from the list to edit its properties
+                          <br />
+                          <OutlinedHandPointLeftIcon />
+                        </section>
+                      )}
+                    </DrawerPanelBody>
+                  </DrawerPanelContent>
+                }
+              >
+                <DrawerContentBody>
+                  {!sorting && (
+                    <>
+                      {validations.current && validations.current.length > 0 && (
+                        <section className="data-dictionary__validation-alert">
+                          <Alert variant="warning" isInline={true} title="Some items are invalid and need attention." />
+                        </section>
+                      )}
+                      <section className="data-dictionary__types-list-wrapper">
+                        <section className="data-dictionary__types-list">
+                          {dataTypes.map((item, index) => (
+                            <DataTypeItemReloaded
+                              dataType={item}
+                              editingIndex={editing}
+                              index={index}
+                              key={index}
+                              onSave={handleSave}
+                              onEdit={handleEdit}
+                              onDelete={handleDelete}
+                              onConstraintsSave={handleConstraintsSave}
+                              onValidate={dataTypeNameValidation}
+                              onOutsideClick={handleOutsideClick}
+                            />
+                          ))}
+                        </section>
+                      </section>
+                    </>
+                  )}
+                  {sorting && (
+                    <section className="data-dictionary__types-list">
+                      <DataTypesSort dataTypes={dataTypes} onReorder={onReorder} />
                     </section>
-                  </>
-                )}
-                {sorting && (
-                  <section className="data-dictionary__types-list">
-                    <DataTypesSort dataTypes={dataTypes} onReorder={onReorder} />
-                  </section>
-                )}
-              </section>
-            )}
-            {viewSection === "batch-add" && (
-              <MultipleDataTypeAdd onAdd={handleMultipleAdd} onCancel={() => setViewSection("main")} />
-            )}
-            {viewSection === "properties" && (
-              <DataDictionaryPropertiesEdit
-                dataType={editingDataType!}
-                dataFieldIndex={editing}
-                onClose={exitFromPropertiesEdit}
-                onSave={handlePropertiesSave}
-              />
-            )}
-          </>
-        </CSSTransition>
-      </SwitchTransition>
+                  )}
+                </DrawerContentBody>
+              </DrawerContent>
+            </Drawer>
+          )}
+        </section>
+        {viewSection === "batch-add" && (
+          <MultipleDataTypeAdd onAdd={handleMultipleAdd} onCancel={() => setViewSection("main")} />
+        )}
+      </>
     </div>
   );
 };
@@ -269,7 +291,7 @@ export default DataDictionaryContainer;
 
 export interface DDDataField {
   name: string;
-  type: "string" | "integer" | "float" | "double" | "boolean";
+  type: "string" | "integer" | "float" | "double" | "boolean" | "structure";
   optype: "categorical" | "ordinal" | "continuous";
   constraints?: Constraints;
   displayName?: string;

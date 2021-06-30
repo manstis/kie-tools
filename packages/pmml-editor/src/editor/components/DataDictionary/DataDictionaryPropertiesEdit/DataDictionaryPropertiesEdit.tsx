@@ -60,6 +60,7 @@ const DataDictionaryPropertiesEdit = (props: DataDictionaryPropertiesEditProps) 
     { value: "float" },
     { value: "double" },
     { value: "boolean" },
+    { value: "structure" },
   ];
   const [optypeSelection, setOptypeSelection] = useState(dataType.optype);
   const [isOptypeSelectOpen, setIsOptypeSelectOpen] = useState(false);
@@ -139,6 +140,8 @@ const DataDictionaryPropertiesEdit = (props: DataDictionaryPropertiesEditProps) 
     }
   };
 
+  const isStructure = useMemo(() => typeSelection === "structure", [typeSelection]);
+
   return (
     <section className="data-dictionary__properties-edit ignore-onclickoutside">
       <Form className="data-dictionary__properties-edit__form">
@@ -191,172 +194,178 @@ const DataDictionaryPropertiesEdit = (props: DataDictionaryPropertiesEditProps) 
                 </Select>
               </FormGroup>
             </FlexItem>
-            <FlexItem>
-              <FormGroup fieldId="optype" label="Op Type" isRequired={true}>
-                <Select
-                  id="optype"
-                  variant={SelectVariant.single}
-                  aria-label="Select Op Type"
-                  onToggle={optypeToggle}
-                  onSelect={optypeSelect}
-                  selections={optypeSelection}
-                  isOpen={isOptypeSelectOpen}
-                  placeholder="Op Type"
-                  className="data-type-item__type-select"
-                  menuAppendTo={"parent"}
-                >
-                  {optypeOptions.map((option, optionIndex) => (
-                    <SelectOption
-                      key={optionIndex}
-                      value={option.value}
-                      className="ignore-onclickoutside data-type-item__type-select__option"
-                    />
-                  ))}
-                </Select>
-              </FormGroup>
-            </FlexItem>
-          </Flex>
-          <Flex className="data-dictionary__properties-edit__field-group">
-            <FlexItem>
-              <FormGroup
-                className="data-dictionary__properties-edit__field"
-                label="Display Name"
-                fieldId="display-name"
-                helperText="Display Name to use instead of the data type name"
-              >
-                <TextInput
-                  type="text"
-                  id="display-name"
-                  name="display-name"
-                  aria-describedby="Display Name"
-                  value={displayName}
-                  onChange={(value) => setDisplayName(value)}
-                  autoComplete="off"
-                  onBlur={() =>
-                    onSave({
-                      displayName: displayName === "" ? undefined : displayName,
-                    })
-                  }
-                />
-              </FormGroup>
-            </FlexItem>
-            <FlexItem>
-              <FormGroup
-                className="data-dictionary__properties-edit__field"
-                label="Cyclic Type"
-                fieldId="is-cyclic"
-                isInline={true}
-                labelIcon={
-                  dataType.optype === "categorical" ? (
-                    <Tooltip content={"Categorical fields cannot be cyclic"}>
-                      <button
-                        aria-label="More info for Cyclic Type"
-                        onClick={(e) => e.preventDefault()}
-                        className="pf-c-form__group-label-help"
-                      >
-                        <HelpIcon style={{ color: "var(--pf-global--info-color--100)" }} />
-                      </button>
-                    </Tooltip>
-                  ) : (
-                    <></>
-                  )
-                }
-              >
-                <Radio
-                  isChecked={isCyclic === true}
-                  name="isCyclic"
-                  onChange={() => {
-                    saveCyclicProperty(true);
-                  }}
-                  label="Yes"
-                  id="isCyclic"
-                  value="isCyclic"
-                  isDisabled={isOptypeDisabled}
-                />
-                <Radio
-                  isChecked={isCyclic === false}
-                  name="isNotCyclic"
-                  onChange={() => {
-                    saveCyclicProperty(false);
-                  }}
-                  label="No"
-                  id="isNotCyclic"
-                  value="isNotCyclic"
-                  isDisabled={isOptypeDisabled}
-                />
-                <Radio
-                  isChecked={isCyclic === undefined}
-                  name="cyclicNotSet"
-                  onChange={() => {
-                    saveCyclicProperty(undefined);
-                  }}
-                  label="Not Set"
-                  id="cyclicNotSet"
-                  value="cyclicNotSet"
-                  isDisabled={isOptypeDisabled}
-                />
-              </FormGroup>
-            </FlexItem>
-          </Flex>
-          <Flex className="data-dictionary__properties-edit__field-group">
-            <FlexItem>
-              <FormGroup
-                className="data-dictionary__properties-edit__field"
-                label="Missing Value"
-                fieldId="missing-value"
-                helperText="Value for when the input is missing"
-              >
-                <TextInput
-                  type="text"
-                  id="missing-value"
-                  name="missing-value"
-                  aria-describedby="Missing Value"
-                  value={missingValue}
-                  onChange={(value) => setMissingValue(value)}
-                  autoComplete="off"
-                  onBlur={() =>
-                    onSave({
-                      missingValue: missingValue === "" ? undefined : missingValue,
-                    })
-                  }
-                />
-              </FormGroup>
-            </FlexItem>
-            <FlexItem>
-              <FormGroup
-                className="data-dictionary__properties-edit__field"
-                label="Invalid Value"
-                fieldId="missing-value"
-                helperText="Value for when the input is invalid"
-              >
-                <TextInput
-                  type="text"
-                  id="invalid-value"
-                  name="invalid-value"
-                  aria-describedby="Invalid Value"
-                  value={invalidValue}
-                  onChange={(value) => setInvalidValue(value)}
-                  autoComplete="off"
-                  onBlur={() =>
-                    onSave({
-                      invalidValue: invalidValue === "" ? undefined : invalidValue,
-                    })
-                  }
-                />
-              </FormGroup>
-            </FlexItem>
-          </Flex>
-          <section className="data-dictionary__constraints-section">
-            {constraintAlert && (
-              <Alert
-                variant="warning"
-                isInline={true}
-                className="data-dictionary__validation-alert"
-                title={constraintAlert}
-              />
+            {!isStructure && (
+              <FlexItem>
+                <FormGroup fieldId="optype" label="Op Type" isRequired={true}>
+                  <Select
+                    id="optype"
+                    variant={SelectVariant.single}
+                    aria-label="Select Op Type"
+                    onToggle={optypeToggle}
+                    onSelect={optypeSelect}
+                    selections={optypeSelection}
+                    isOpen={isOptypeSelectOpen}
+                    placeholder="Op Type"
+                    className="data-type-item__type-select"
+                    menuAppendTo={"parent"}
+                  >
+                    {optypeOptions.map((option, optionIndex) => (
+                      <SelectOption
+                        key={optionIndex}
+                        value={option.value}
+                        className="ignore-onclickoutside data-type-item__type-select__option"
+                      />
+                    ))}
+                  </Select>
+                </FormGroup>
+              </FlexItem>
             )}
-            <ConstraintsEdit dataType={dataType} dataFieldIndex={dataFieldIndex} onSave={onSave} />
-          </section>
+          </Flex>
+          {!isStructure && (
+            <>
+              <Flex className="data-dictionary__properties-edit__field-group">
+                <FlexItem>
+                  <FormGroup
+                    className="data-dictionary__properties-edit__field"
+                    label="Display Name"
+                    fieldId="display-name"
+                    helperText="Display Name to use instead of the data type name"
+                  >
+                    <TextInput
+                      type="text"
+                      id="display-name"
+                      name="display-name"
+                      aria-describedby="Display Name"
+                      value={displayName}
+                      onChange={(value) => setDisplayName(value)}
+                      autoComplete="off"
+                      onBlur={() =>
+                        onSave({
+                          displayName: displayName === "" ? undefined : displayName,
+                        })
+                      }
+                    />
+                  </FormGroup>
+                </FlexItem>
+                <FlexItem>
+                  <FormGroup
+                    className="data-dictionary__properties-edit__field"
+                    label="Cyclic Type"
+                    fieldId="is-cyclic"
+                    isInline={true}
+                    labelIcon={
+                      dataType.optype === "categorical" ? (
+                        <Tooltip content={"Categorical fields cannot be cyclic"}>
+                          <button
+                            aria-label="More info for Cyclic Type"
+                            onClick={(e) => e.preventDefault()}
+                            className="pf-c-form__group-label-help"
+                          >
+                            <HelpIcon style={{ color: "var(--pf-global--info-color--100)" }} />
+                          </button>
+                        </Tooltip>
+                      ) : (
+                        <></>
+                      )
+                    }
+                  >
+                    <Radio
+                      isChecked={isCyclic === true}
+                      name="isCyclic"
+                      onChange={() => {
+                        saveCyclicProperty(true);
+                      }}
+                      label="Yes"
+                      id="isCyclic"
+                      value="isCyclic"
+                      isDisabled={isOptypeDisabled}
+                    />
+                    <Radio
+                      isChecked={isCyclic === false}
+                      name="isNotCyclic"
+                      onChange={() => {
+                        saveCyclicProperty(false);
+                      }}
+                      label="No"
+                      id="isNotCyclic"
+                      value="isNotCyclic"
+                      isDisabled={isOptypeDisabled}
+                    />
+                    <Radio
+                      isChecked={isCyclic === undefined}
+                      name="cyclicNotSet"
+                      onChange={() => {
+                        saveCyclicProperty(undefined);
+                      }}
+                      label="Not Set"
+                      id="cyclicNotSet"
+                      value="cyclicNotSet"
+                      isDisabled={isOptypeDisabled}
+                    />
+                  </FormGroup>
+                </FlexItem>
+              </Flex>
+              <Flex className="data-dictionary__properties-edit__field-group">
+                <FlexItem>
+                  <FormGroup
+                    className="data-dictionary__properties-edit__field"
+                    label="Missing Value"
+                    fieldId="missing-value"
+                    helperText="Value for when the input is missing"
+                  >
+                    <TextInput
+                      type="text"
+                      id="missing-value"
+                      name="missing-value"
+                      aria-describedby="Missing Value"
+                      value={missingValue}
+                      onChange={(value) => setMissingValue(value)}
+                      autoComplete="off"
+                      onBlur={() =>
+                        onSave({
+                          missingValue: missingValue === "" ? undefined : missingValue,
+                        })
+                      }
+                    />
+                  </FormGroup>
+                </FlexItem>
+                <FlexItem>
+                  <FormGroup
+                    className="data-dictionary__properties-edit__field"
+                    label="Invalid Value"
+                    fieldId="missing-value"
+                    helperText="Value for when the input is invalid"
+                  >
+                    <TextInput
+                      type="text"
+                      id="invalid-value"
+                      name="invalid-value"
+                      aria-describedby="Invalid Value"
+                      value={invalidValue}
+                      onChange={(value) => setInvalidValue(value)}
+                      autoComplete="off"
+                      onBlur={() =>
+                        onSave({
+                          invalidValue: invalidValue === "" ? undefined : invalidValue,
+                        })
+                      }
+                    />
+                  </FormGroup>
+                </FlexItem>
+              </Flex>
+              <section className="data-dictionary__constraints-section">
+                {constraintAlert && (
+                  <Alert
+                    variant="warning"
+                    isInline={true}
+                    className="data-dictionary__validation-alert"
+                    title={constraintAlert}
+                  />
+                )}
+                <ConstraintsEdit dataType={dataType} dataFieldIndex={dataFieldIndex} onSave={onSave} />
+              </section>
+            </>
+          )}
         </div>
       </Form>
     </section>

@@ -14,7 +14,7 @@ export const convertPMML2DD = (PMMLDataDictionary: DataDictionary | undefined): 
 export const convertToDataField = (item: DDDataField): DataField => {
   const convertedField: DataField = {
     name: item.name as FieldName,
-    dataType: item.type,
+    dataType: "string",
     optype: item.optype,
   };
 
