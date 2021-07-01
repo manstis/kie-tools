@@ -31,7 +31,7 @@ const DataDictionaryHandler = () => {
   //   setIsDataDictionaryOpen(!isDataDictionaryOpen);
   // };
 
-  const addField = (name: string, type: DDDataField["type"], optype: DDDataField["optype"]) => {
+  const addField = (name: string, type: DDDataField["type"], optype: DDDataField["optype"], index?: number) => {
     // dispatch({
     //   type: Actions.AddDataDictionaryField,
     //   payload: {
@@ -40,14 +40,36 @@ const DataDictionaryHandler = () => {
     //     optype: optype,
     //   },
     // });
-    setDictionary((previousDictionary) => [
-      ...previousDictionary,
-      {
-        name,
-        type,
-        optype,
-      },
-    ]);
+    if (index) {
+      setDictionary((previousDictionary) =>
+        previousDictionary.map((field, fieldIndex) => {
+          return fieldIndex === index
+            ? {
+                ...field,
+                children: field.children
+                  ? [
+                      ...field.children,
+                      {
+                        name,
+                        type,
+                        optype,
+                      },
+                    ]
+                  : [{ name, type, optype }],
+              }
+            : field;
+        })
+      );
+    } else {
+      setDictionary((previousDictionary) => [
+        ...previousDictionary,
+        {
+          name,
+          type,
+          optype,
+        },
+      ]);
+    }
   };
 
   const addBatchFields = (fields: string[]) => {

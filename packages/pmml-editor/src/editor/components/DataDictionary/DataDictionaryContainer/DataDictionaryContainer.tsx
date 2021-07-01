@@ -23,7 +23,15 @@ import { Alert } from "@patternfly/react-core/dist/js/components/Alert";
 import { SortIcon } from "@patternfly/react-icons/dist/js/icons/sort-icon";
 import { PlusIcon } from "@patternfly/react-icons/dist/js/icons/plus-icon";
 import { BoltIcon } from "@patternfly/react-icons/dist/js/icons/bolt-icon";
-import { Drawer, DrawerContent, DrawerContentBody, DrawerPanelContent, DrawerPanelBody } from "@patternfly/react-core";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  Drawer,
+  DrawerContent,
+  DrawerContentBody,
+  DrawerPanelContent,
+  DrawerPanelBody,
+} from "@patternfly/react-core";
 import { OutlinedHandPointLeftIcon } from "@patternfly/react-icons";
 import MultipleDataTypeAdd from "../MultipleDataTypeAdd/MultipleDataTypeAdd";
 import DataTypesSort from "../DataTypesSort/DataTypesSort";
@@ -35,10 +43,11 @@ import { useValidationRegistry } from "../../../validation";
 import { Builder } from "../../../paths";
 import "./DataDictionaryContainer.scss";
 import DataTypeItemReloaded from "../DataTypeItem/DataTypeItemReloaded";
+import { CSSTransition, SwitchTransition } from "react-transition-group";
 
 interface DataDictionaryContainerProps {
   dataDictionary: DDDataField[];
-  onAdd: (name: string, type: DDDataField["type"], optype: DDDataField["optype"]) => void;
+  onAdd: (name: string, type: DDDataField["type"], optype: DDDataField["optype"], index?: number) => void;
   onEdit: (index: number, originalName: string, field: DDDataField) => void;
   onDelete: (index: number) => void;
   onReorder: (oldIndex: number, newIndex: number) => void;
@@ -50,6 +59,7 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
   const { dataDictionary, onAdd, onEdit, onDelete, onReorder, onBatchAdd, onEditingPhaseChange } = props;
   const [dataTypes, setDataTypes] = useState<DDDataField[]>(dataDictionary);
   const [editing, setEditing] = useState<number | undefined>();
+  const [structureIndex, setStructureIndex] = useState<number | undefined>();
   const [viewSection, setViewSection] = useState<dataDictionarySection>("main");
   const [editingDataType, setEditingDataType] = useState<DDDataField>();
   const [sorting, setSorting] = useState(false);
@@ -65,10 +75,18 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
     }
     // updating constraintsEdit when dictionary changes
     if (editing !== undefined) {
-      setEditingDataType(dataDictionary[editing]);
+      if (structureIndex !== undefined) {
+        if (editing === -1) {
+          setEditingDataType(dataDictionary[structureIndex]);
+        } else {
+          setEditingDataType(dataDictionary[structureIndex].children?.[editing]);
+        }
+      } else {
+        setEditingDataType(dataDictionary[editing]);
+      }
     }
     setDataTypes(dataDictionary);
-  }, [dataDictionary, editing, viewSection]);
+  }, [dataDictionary, editing, viewSection, structureIndex]);
 
   const handleOutsideClick = () => {
     setEditing(undefined);
@@ -80,13 +98,16 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
     onAdd(
       findIncrementalName(
         "New Data Type",
-        dataTypes.map((dt) => dt.name),
+        structureIndex === undefined
+          ? dataTypes.map((dt) => dt.name)
+          : dataTypes[structureIndex].children?.map((dt) => dt.name) ?? [],
         1
       ),
       "string",
-      "categorical"
+      "categorical",
+      structureIndex
     );
-    setEditing(dataTypes.length);
+    setEditing(structureIndex !== undefined ? dataTypes[structureIndex].children?.length ?? 0 : dataTypes.length);
     onEditingPhaseChange(true);
   };
 
@@ -103,7 +124,17 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
   };
 
   const handleEdit = (index: number) => {
-    setEditing(index);
+    if (index === -1) {
+      setEditing(-1);
+    } else {
+      if (dataTypes[index].type === "structure") {
+        setStructureIndex(index);
+        setEditing(-1);
+      } else {
+        setEditing(index);
+      }
+    }
+
     // setEditingDataType(dataTypes[index]);
     onEditingPhaseChange(true);
   };
@@ -133,7 +164,10 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
       const dataType = dataTypes[editing];
       const existingPartial = {};
       Object.keys(payload).forEach((key) => Reflect.set(existingPartial, key, Reflect.get(dataType, key)));
-
+      if (payload?.type && payload.type === "structure" && payload.type !== dataTypes[editing].type) {
+        setStructureIndex(editing);
+        setEditing(-1);
+      }
       if (!isEqual(payload, existingPartial)) {
         onEdit(editing, dataType.name, Object.assign(dataType, payload));
       }
@@ -159,6 +193,14 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
       isValid = false;
     }
     return isValid;
+  };
+
+  const getTransition = (structureIndex: number | undefined) => {
+    if (structureIndex === undefined) {
+      return "data-dictionary__overview";
+    } else {
+      return "enter-from-right";
+    }
   };
 
   const { validationRegistry } = useValidationRegistry();
@@ -241,39 +283,113 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
                   </DrawerPanelContent>
                 }
               >
-                <DrawerContentBody>
-                  {!sorting && (
-                    <>
-                      {validations.current && validations.current.length > 0 && (
-                        <section className="data-dictionary__validation-alert">
-                          <Alert variant="warning" isInline={true} title="Some items are invalid and need attention." />
-                        </section>
-                      )}
-                      <section className="data-dictionary__types-list-wrapper">
-                        <section className="data-dictionary__types-list">
-                          {dataTypes.map((item, index) => (
-                            <DataTypeItemReloaded
-                              dataType={item}
-                              editingIndex={editing}
-                              index={index}
-                              key={index}
-                              onSave={handleSave}
-                              onEdit={handleEdit}
-                              onDelete={handleDelete}
-                              onConstraintsSave={handleConstraintsSave}
-                              onValidate={dataTypeNameValidation}
-                              onOutsideClick={handleOutsideClick}
-                            />
-                          ))}
-                        </section>
-                      </section>
-                    </>
-                  )}
-                  {sorting && (
-                    <section className="data-dictionary__types-list">
-                      <DataTypesSort dataTypes={dataTypes} onReorder={onReorder} />
-                    </section>
-                  )}
+                <DrawerContentBody
+                  style={{ overflowX: "hidden", backgroundColor: "var(--pf-global--BackgroundColor--200)" }}
+                >
+                  <SwitchTransition mode={"out-in"}>
+                    <CSSTransition
+                      timeout={{
+                        enter: 230,
+                        exit: 100,
+                      }}
+                      classNames={getTransition(structureIndex)}
+                      key={structureIndex ?? -1}
+                    >
+                      <>
+                        {!sorting && (
+                          <>
+                            {structureIndex === undefined && (
+                              <>
+                                {validations.current && validations.current.length > 0 && (
+                                  <section className="data-dictionary__validation-alert">
+                                    <Alert
+                                      variant="warning"
+                                      isInline={true}
+                                      title="Some items are invalid and need attention."
+                                    />
+                                  </section>
+                                )}
+                                <section className="data-dictionary__types-list-wrapper">
+                                  <section className="data-dictionary__types-list">
+                                    {dataTypes.map((item, index) => (
+                                      <DataTypeItemReloaded
+                                        dataType={item}
+                                        editingIndex={editing}
+                                        index={index}
+                                        key={index}
+                                        onSave={handleSave}
+                                        onEdit={handleEdit}
+                                        onDelete={handleDelete}
+                                        onConstraintsSave={handleConstraintsSave}
+                                        onValidate={dataTypeNameValidation}
+                                        onOutsideClick={handleOutsideClick}
+                                      />
+                                    ))}
+                                  </section>
+                                </section>
+                              </>
+                            )}
+                            {structureIndex !== undefined && (
+                              <section className="data-dictionary__types-list-wrapper">
+                                <section className="data-dictionary__types-list data-dictionary__types-list--with-breadcrumb">
+                                  <Breadcrumb className="data-dictionary__types-list__breadcrumb">
+                                    <BreadcrumbItem component={"span"}>
+                                      <Button
+                                        variant="link"
+                                        isInline={true}
+                                        onClick={() => {
+                                          setStructureIndex(undefined);
+                                          setEditing(undefined);
+                                          setEditingDataType(undefined);
+                                        }}
+                                      >
+                                        Data Types List
+                                      </Button>
+                                    </BreadcrumbItem>
+                                    <BreadcrumbItem isActive>{dataTypes[structureIndex].name}</BreadcrumbItem>
+                                  </Breadcrumb>
+                                  <DataTypeItemReloaded
+                                    dataType={dataTypes[structureIndex]}
+                                    editingIndex={editing}
+                                    index={-1}
+                                    key={-1}
+                                    onSave={handleSave}
+                                    onEdit={handleEdit}
+                                    onDelete={handleDelete}
+                                    onConstraintsSave={handleConstraintsSave}
+                                    onValidate={dataTypeNameValidation}
+                                    onOutsideClick={handleOutsideClick}
+                                  />
+                                  <section className="data-dictionary__types-list__children">
+                                    {dataTypes[structureIndex].children !== undefined &&
+                                      dataTypes[structureIndex].children?.map((item, index) => (
+                                        <DataTypeItemReloaded
+                                          dataType={item}
+                                          editingIndex={editing}
+                                          index={index}
+                                          key={index}
+                                          onSave={handleSave}
+                                          onEdit={handleEdit}
+                                          onDelete={handleDelete}
+                                          onConstraintsSave={handleConstraintsSave}
+                                          onValidate={dataTypeNameValidation}
+                                          onOutsideClick={handleOutsideClick}
+                                        />
+                                      ))}
+                                  </section>
+                                </section>
+                              </section>
+                            )}
+                          </>
+                        )}
+                        {sorting && (
+                          <section className="data-dictionary__types-list">
+                            <DataTypesSort dataTypes={dataTypes} onReorder={onReorder} />
+                          </section>
+                        )}
+                      </>
+                    </CSSTransition>
+                  </SwitchTransition>
                 </DrawerContentBody>
               </DrawerContent>
             </Drawer>
@@ -298,6 +414,7 @@ export interface DDDataField {
   isCyclic?: boolean;
   missingValue?: string;
   invalidValue?: string;
+  children?: DDDataField[];
 }
 
 type dataDictionarySection = "main" | "batch-add" | "properties";

@@ -22,6 +22,7 @@ import { Flex, FlexItem } from "@patternfly/react-core/dist/js/layouts/Flex";
 import { Split, SplitItem } from "@patternfly/react-core/dist/js/layouts/Split";
 import { Label } from "@patternfly/react-core/dist/js/components/Label";
 import { TrashIcon } from "@patternfly/react-icons/dist/js/icons/trash-icon";
+import { OutlinedListAltIcon } from "@patternfly/react-icons";
 import { DDDataField } from "../DataDictionaryContainer/DataDictionaryContainer";
 import "./DataTypeItem.scss";
 import ConstraintsLabel from "../ConstraintsLabel/ConstraintsLabel";
@@ -36,7 +37,7 @@ interface DataTypeItemProps {
   index: number;
   editingIndex: number | undefined;
   onSave: (dataType: DDDataField, index: number | null) => void;
-  onEdit?: (index: number) => void;
+  onEdit?: (index: number, isChildren?: boolean) => void;
   onDelete?: (index: number) => void;
   onConstraintsSave: (dataType: DDDataField) => void;
   onValidate: (dataTypeName: string) => boolean;
@@ -185,25 +186,38 @@ const DataTypeItem = (props: DataTypeItemProps) => {
             <SplitItem>
               <span className="data-type-item__name">{name}</span>
             </SplitItem>
-            <SplitItem isFilled={true}>
-              <Label color="blue" className="data-type-item__type-label">
-                {typeSelection}
-              </Label>{" "}
-              <Label color="blue" className="data-type-item__type-label">
-                {optypeSelection}
-              </Label>{" "}
-              <PropertiesLabels
-                dataType={dataType}
-                editingIndex={editingIndex}
-                onPropertyDelete={handlePropertiesDelete}
-              />
-              <ConstraintsLabel
-                dataType={dataType}
-                dataTypeIndex={index}
-                editMode={true}
-                onConstraintsDelete={handleConstraintsDelete}
-              />
-            </SplitItem>
+            {dataType.type !== "structure" ? (
+              <SplitItem isFilled={true}>
+                <Label color="blue" className="data-type-item__type-label">
+                  {typeSelection}
+                </Label>{" "}
+                <Label color="blue" className="data-type-item__type-label">
+                  {optypeSelection}
+                </Label>{" "}
+                <PropertiesLabels
+                  dataType={dataType}
+                  editingIndex={editingIndex}
+                  onPropertyDelete={handlePropertiesDelete}
+                />
+                <ConstraintsLabel
+                  dataType={dataType}
+                  dataTypeIndex={index}
+                  editMode={true}
+                  onConstraintsDelete={handleConstraintsDelete}
+                />
+              </SplitItem>
+            ) : (
+              <SplitItem isFilled={true}>
+                <Label color="purple" icon={<OutlinedListAltIcon />} className="data-type-item__type-label">
+                  {typeSelection}
+                </Label>
+                {dataType.children && dataType.children?.length > -1 && (
+                  <Label color="purple" className="data-type-item__type-label" style={{ marginLeft: 3 }}>
+                    {dataType.children?.map((child) => child.name).join(", ")}
+                  </Label>
+                )}
+              </SplitItem>
+            )}
             <SplitItem>
               <Button variant="plain" onClick={handleDelete}>
                 <TrashIcon />
@@ -240,16 +254,29 @@ const DataTypeItem = (props: DataTypeItemProps) => {
             <SplitItem>
               <span className="data-type-item__name">{name}</span>
             </SplitItem>
-            <SplitItem isFilled={true}>
-              <Label color="blue" className="data-type-item__type-label">
-                {typeSelection}
-              </Label>{" "}
-              <Label color="blue" className="data-type-item__type-label">
-                {optypeSelection}
-              </Label>{" "}
-              <PropertiesLabels dataType={dataType} />
-              <ConstraintsLabel dataType={dataType} dataTypeIndex={index} />
-            </SplitItem>
+            {dataType.type !== "structure" ? (
+              <SplitItem isFilled={true}>
+                <Label color="blue" className="data-type-item__type-label">
+                  {typeSelection}
+                </Label>{" "}
+                <Label color="blue" className="data-type-item__type-label">
+                  {optypeSelection}
+                </Label>{" "}
+                <PropertiesLabels dataType={dataType} />
+                <ConstraintsLabel dataType={dataType} dataTypeIndex={index} />
+              </SplitItem>
+            ) : (
+              <SplitItem isFilled={true}>
+                <Label color="purple" icon={<OutlinedListAltIcon />} className="data-type-item__type-label">
+                  {typeSelection}
+                </Label>
+                {dataType.children && dataType.children?.length > -1 && (
+                  <Label color="purple" className="data-type-item__type-label" style={{ marginLeft: 3 }}>
+                    {dataType.children?.map((child) => child.name).join(", ")}
+                  </Label>
+                )}
+              </SplitItem>
+            )}
             <SplitItem>
               <Button variant="plain" onClick={handleDelete}>
                 <TrashIcon />

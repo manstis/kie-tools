@@ -24,6 +24,21 @@
         border: var(--pf-global--BorderWidth--lg) solid var(--pf-global--active-color--100);
       }
     }
+    &--with-breadcrumb {
+      position: relative;
+      padding-top: 3em;
+    }
+    &__breadcrumb {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      .pf-c-breadcrumb__item {
+        --pf-c-breadcrumb__item--FontSize: var(--pf-global--FontSize--md);
+      }
+    }
+    &__children {
+      margin-left: 2rem;
+    }
   }
 
   &__validation-alert {
