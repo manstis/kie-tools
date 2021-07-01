@@ -202,7 +202,12 @@ const EnumItem = SortableElement(({ enumValue, enumsCount, position, onUpdate, o
           />
         </FlexItem>
         <FlexItem align={{ default: "alignRight" }}>
-          <Button variant={ButtonVariant.plain} onClick={handleDelete} isDisabled={enumsCount === 1}>
+          <Button
+            variant={ButtonVariant.plain}
+            onClick={handleDelete}
+            isDisabled={enumsCount === 1}
+            className="ignore-onclickoutside"
+          >
             <TrashIcon />
           </Button>
         </FlexItem>

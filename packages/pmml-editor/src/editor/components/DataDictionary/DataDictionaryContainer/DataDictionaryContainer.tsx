@@ -51,7 +51,7 @@ interface DataDictionaryContainerProps {
   onEdit: (index: number, originalName: string, field: DDDataField) => void;
   onDelete: (index: number) => void;
   onReorder: (oldIndex: number, newIndex: number) => void;
-  onBatchAdd: (fields: string[]) => void;
+  onBatchAdd: (fields: string[], index?: number) => void;
   onEditingPhaseChange: (status: boolean) => void;
 }
 
@@ -141,7 +141,7 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
 
   const handleMultipleAdd = (fields: string) => {
     const fieldsNames = fields.split("\n").filter((item) => item.trim().length > 0);
-    onBatchAdd(fieldsNames);
+    onBatchAdd(fieldsNames, structureIndex);
     setViewSection("main");
   };
 
@@ -273,10 +273,12 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
                           onSave={handlePropertiesSave}
                         />
                       ) : (
-                        <section style={{ margin: "5em 0", textAlign: "center" }}>
+                        <section
+                          style={{ margin: "5em 0", textAlign: "center", color: "var(--pf-global--Color--200)" }}
+                        >
                           Click on a data type from the list to edit its properties
                           <br />
-                          <OutlinedHandPointLeftIcon />
+                          <OutlinedHandPointLeftIcon style={{ fontSize: "var(--pf-global--icon--FontSize--md)" }} />
                         </section>
                       )}
                     </DrawerPanelBody>

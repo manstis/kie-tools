@@ -72,22 +72,30 @@ const DataDictionaryHandler = () => {
     }
   };
 
-  const addBatchFields = (fields: string[]) => {
+  const addBatchFields = (fields: string[], structureIndex?: number) => {
     // dispatch({
     //   type: Actions.AddBatchDataDictionaryFields,
     //   payload: {
     //     dataDictionaryFields: fields,
     //   },
     // });
+    const newFields = fields.map((field) => ({
+      name: field,
+      type: "string" as DDDataField["type"],
+      optype: "categorical" as DDDataField["optype"],
+    }));
     setDictionary((previousDictionary) => {
-      return [
-        ...previousDictionary,
-        ...fields.map((field) => ({
-          name: field,
-          type: "string" as DDDataField["type"],
-          optype: "categorical" as DDDataField["optype"],
-        })),
-      ];
+      if (structureIndex !== undefined) {
+        return [
+          ...previousDictionary.map((field, fieldIndex) => {
+            return fieldIndex !== structureIndex
+              ? field
+              : { ...field, children: field.children ? [...field.children, ...newFields] : [...newFields] };
+          }),
+        ];
+      } else {
+        return [...previousDictionary, ...newFields];
+      }
     });
   };
 
