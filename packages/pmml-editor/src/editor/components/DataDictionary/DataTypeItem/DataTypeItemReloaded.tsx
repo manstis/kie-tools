@@ -211,11 +211,6 @@ const DataTypeItem = (props: DataTypeItemProps) => {
                 <Label color="purple" icon={<OutlinedListAltIcon />} className="data-type-item__type-label">
                   {typeSelection}
                 </Label>
-                {dataType.children && dataType.children?.length > -1 && (
-                  <Label color="purple" className="data-type-item__type-label" style={{ marginLeft: 3 }}>
-                    {dataType.children?.map((child) => child.name).join(", ")}
-                  </Label>
-                )}
               </SplitItem>
             )}
             <SplitItem>
