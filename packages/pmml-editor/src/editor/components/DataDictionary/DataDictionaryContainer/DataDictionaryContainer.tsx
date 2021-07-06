@@ -23,15 +23,7 @@ import { Alert } from "@patternfly/react-core/dist/js/components/Alert";
 import { SortIcon } from "@patternfly/react-icons/dist/js/icons/sort-icon";
 import { PlusIcon } from "@patternfly/react-icons/dist/js/icons/plus-icon";
 import { BoltIcon } from "@patternfly/react-icons/dist/js/icons/bolt-icon";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  Drawer,
-  DrawerContent,
-  DrawerContentBody,
-  DrawerPanelContent,
-  DrawerPanelBody,
-} from "@patternfly/react-core";
+import { Drawer, DrawerContent, DrawerContentBody, DrawerPanelContent, DrawerPanelBody } from "@patternfly/react-core";
 import { OutlinedHandPointLeftIcon } from "@patternfly/react-icons";
 import MultipleDataTypeAdd from "../MultipleDataTypeAdd/MultipleDataTypeAdd";
 import DataTypesSort from "../DataTypesSort/DataTypesSort";
@@ -51,9 +43,9 @@ interface DataDictionaryContainerProps {
   dataDictionary: DDDataField[];
   onAdd: (name: string, type: DDDataField["type"], optype: DDDataField["optype"], pathString?: string) => void;
   onEdit: (pathString: string, field: DDDataField) => void;
-  onDelete: (index: number) => void;
+  onDelete: (index: number, pathString?: string) => void;
   onReorder: (oldIndex: number, newIndex: number) => void;
-  onBatchAdd: (fields: string[], index?: number) => void;
+  onBatchAdd: (fields: string[], pathString?: string) => void;
   onEditingPhaseChange: (status: boolean) => void;
 }
 
@@ -63,20 +55,21 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
   const [dataTypesView, setDataTypesView] = useState(dataDictionary);
   const [editingIndex, setEditingIndex] = useState<number | undefined>();
   const [editingPath, setEditingPath] = useState<Array<number>>([]);
-  const [structureIndex, setStructureIndex] = useState<number | undefined>();
   const [viewSection, setViewSection] = useState<dataDictionarySection>("main");
   const [editingDataType, setEditingDataType] = useState<DDDataField>();
   const [sorting, setSorting] = useState(false);
+  const [deleteStructure, setDeleteStructure] = useState<{ index: number; path: string | undefined } | undefined>();
 
   useEffect(() => {
     // undoing a recently created data field force to exit the editing mode for that field
-    if (editingIndex === dataDictionary.length) {
-      setEditingIndex(undefined);
-      if (viewSection !== "main") {
-        setViewSection("main");
-      }
-      onEditingPhaseChange(false);
-    }
+    // if (editingIndex === dataTypesView.length) {
+    //   setEditingIndex(undefined);
+    //   if (viewSection !== "main") {
+    //     setViewSection("main");
+    //   }
+    //   onEditingPhaseChange(false);
+    // }
+
     // updating editing data type
     if (editingIndex !== undefined) {
       if (editingIndex === -1) {
@@ -95,12 +88,19 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
       // }
     }
     setDataTypes(dataDictionary);
-  }, [dataDictionary, editingIndex, viewSection, structureIndex]);
+  }, [dataDictionary, dataTypesView, editingIndex, editingPath]);
 
   useEffect(() => {
     const pathString = getPathsString(editingPath);
     setDataTypesView(pathString.length ? get(dataTypes, pathString, []) : dataTypes);
   }, [editingPath.length, dataTypes]);
+
+  useEffect(() => {
+    if (deleteStructure) {
+      onDelete(deleteStructure.index, deleteStructure.path);
+      setDeleteStructure(undefined);
+    }
+  }, [deleteStructure]);
 
   const handleOutsideClick = () => {
     setEditingIndex(undefined);
@@ -123,6 +123,12 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
     onEditingPhaseChange(true);
   };
 
+  const addMultipleDataTypes = (fields: string) => {
+    const fieldsNames = fields.split("\n").filter((item) => item.trim().length > 0);
+    onBatchAdd(fieldsNames, editingPath.length ? getParentPathString(editingPath) : undefined);
+    setViewSection("main");
+  };
+
   const saveDataType = (dataType: DDDataField, index: number) => {
     // onEdit(index, dataTypes[index].name, dataType);
   };
@@ -132,18 +138,44 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
   };
 
   const handleDelete = (index: number) => {
-    onDelete(index);
+    // deleting an element while editing it, so cleaning up editing states
+    if (editingIndex === index) {
+      setEditingIndex(undefined);
+      setEditingDataType(undefined);
+    }
+    // deleting a structure while inside it, so moving back a level
+    if (index === -1) {
+      setEditingPath((prevState) => {
+        const updatedPath = [...prevState];
+        updatedPath.splice(updatedPath.length - 1);
+        return updatedPath;
+      });
+    }
+
+    if (index === -1) {
+      // relying to a state variable to defer deletion until moving back to the parent navigation level
+      const deleteIndex = editingPath[editingPath.length - 1];
+      const updatedPath = [...editingPath];
+      updatedPath.splice(updatedPath.length - 1);
+      const deletePathString = updatedPath.length ? getParentPathString(updatedPath) : undefined;
+      if (deleteIndex) {
+        setDeleteStructure({ index: deleteIndex, path: deletePathString });
+      }
+    } else {
+      onDelete(index, editingPath.length ? getParentPathString(editingPath) : undefined);
+    }
   };
 
   const handleEdit = (index: number, path?: number) => {
     const updatedPath = [...editingPath];
-    if (path !== undefined) {
+    if (path !== undefined && index !== -1) {
       updatedPath.push(path);
       setEditingPath(updatedPath);
       setEditingIndex(-1);
     } else {
       setEditingIndex(index);
     }
+
     // const pathString = getPathsString(updatedPath);
     // if (updatedPath.length) {
     //   setDataTypesView(get(dataTypes, pathString, []));
@@ -163,12 +195,6 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
 
     // setEditingDataType(dataTypes[index]);
     onEditingPhaseChange(true);
-  };
-
-  const handleMultipleAdd = (fields: string) => {
-    const fieldsNames = fields.split("\n").filter((item) => item.trim().length > 0);
-    onBatchAdd(fieldsNames, structureIndex);
-    setViewSection("main");
   };
 
   // const handleConstraintsEdit = (dataType: DDDataField) => {
@@ -423,7 +449,7 @@ const DataDictionaryContainer = (props: DataDictionaryContainerProps) => {
           )}
         </section>
         {viewSection === "batch-add" && (
-          <MultipleDataTypeAdd onAdd={handleMultipleAdd} onCancel={() => setViewSection("main")} />
+          <MultipleDataTypeAdd onAdd={addMultipleDataTypes} onCancel={() => setViewSection("main")} />
         )}
       </>
     </div>

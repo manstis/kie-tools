@@ -148,7 +148,7 @@ const DataDictionaryPropertiesEdit = (props: DataDictionaryPropertiesEditProps) 
     if (name.startsWith("New Data Type")) {
       input?.select();
     }
-  }, []);
+  }, [dataType]);
 
   const isStructure = useMemo(() => typeSelection === "structure", [typeSelection]);
 

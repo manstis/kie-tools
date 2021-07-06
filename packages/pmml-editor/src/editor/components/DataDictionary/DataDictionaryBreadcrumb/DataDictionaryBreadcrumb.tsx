@@ -62,10 +62,10 @@ const DataDictionaryBreadcrumb = (props: DataDictionaryBreadcrumbProps) => {
                   onNavigate(currentPath);
                 }}
               >
-                {dataType.name}
+                {dataType?.name}
               </Button>
             ) : (
-              <strong>{dataType.name}</strong>
+              <strong>{dataType?.name}</strong>
             )}
           </BreadcrumbItem>
         );

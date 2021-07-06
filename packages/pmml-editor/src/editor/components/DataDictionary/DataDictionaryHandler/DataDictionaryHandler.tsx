@@ -43,9 +43,9 @@ const DataDictionaryHandler = () => {
     // });
     if (pathString) {
       setDictionary((previousDictionary) => {
-        const updatedType = get(previousDictionary, pathString);
-        updatedType.children = [
-          ...(updatedType.children ?? []),
+        const updatedDataType: DDDataField = get(previousDictionary, pathString);
+        updatedDataType.children = [
+          ...(updatedDataType.children ?? []),
           {
             name,
             type,
@@ -66,7 +66,7 @@ const DataDictionaryHandler = () => {
     }
   };
 
-  const addBatchFields = (fields: string[], structureIndex?: number) => {
+  const addBatchFields = (fields: string[], pathString?: string) => {
     // dispatch({
     //   type: Actions.AddBatchDataDictionaryFields,
     //   payload: {
@@ -78,32 +78,40 @@ const DataDictionaryHandler = () => {
       type: "string" as DDDataField["type"],
       optype: "categorical" as DDDataField["optype"],
     }));
-    setDictionary((previousDictionary) => {
-      if (structureIndex !== undefined) {
-        return [
-          ...previousDictionary.map((field, fieldIndex) => {
-            return fieldIndex !== structureIndex
-              ? field
-              : { ...field, children: field.children ? [...field.children, ...newFields] : [...newFields] };
-          }),
-        ];
-      } else {
-        return [...previousDictionary, ...newFields];
-      }
-    });
+    if (pathString) {
+      setDictionary((previousDictionary) => {
+        const updatedDataType: DDDataField = get(previousDictionary, pathString);
+        updatedDataType.children = updatedDataType.children
+          ? [...updatedDataType.children, ...newFields]
+          : [...newFields];
+        return [...previousDictionary];
+      });
+    } else {
+      setDictionary((previousDictionary) => [...previousDictionary, ...newFields]);
+    }
   };
 
-  const deleteField = (index: number) => {
+  const deleteField = (index: number, pathString?: string) => {
     // dispatch({
     //   type: Actions.DeleteDataDictionaryField,
     //   payload: {
     //     index,
     //   },
     // });
-    if (index >= 0 && index < dictionary.length) {
+    if (pathString) {
       setDictionary((previousDictionary) => {
-        return previousDictionary.filter((field, fieldIndex) => fieldIndex !== index);
+        const updatedDataType: DDDataField = get(previousDictionary, pathString);
+        if (updatedDataType.children && index >= 0 && index < updatedDataType.children.length) {
+          updatedDataType.children = updatedDataType.children.filter((field, fieldIndex) => fieldIndex !== index);
+        }
+        return [...previousDictionary];
       });
+    } else {
+      if (index >= 0 && index < dictionary.length) {
+        setDictionary((previousDictionary) => {
+          return previousDictionary.filter((field, fieldIndex) => fieldIndex !== index);
+        });
+      }
     }
   };
 

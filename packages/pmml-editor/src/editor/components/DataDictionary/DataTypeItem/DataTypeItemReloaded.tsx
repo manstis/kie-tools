@@ -82,9 +82,7 @@ const DataTypeItem = (props: DataTypeItemProps) => {
   const handleDelete = (event: React.MouseEvent | React.KeyboardEvent) => {
     event.stopPropagation();
     event.preventDefault();
-    if (onDelete) {
-      onDelete(index);
-    }
+    onDelete?.(index);
   };
 
   const handleConstraintsDelete = () => {
@@ -222,7 +220,7 @@ const DataTypeItem = (props: DataTypeItemProps) => {
                 <Label color="purple" icon={<OutlinedListAltIcon />} className="data-type-item__type-label">
                   {typeSelection}
                 </Label>
-                {dataType.children && dataType.children?.length > -1 && (
+                {index !== -1 && dataType.children && dataType.children.length >= 0 && (
                   <Label color="purple" className="data-type-item__type-label" style={{ marginLeft: 3 }}>
                     {dataType.children?.map((child) => child.name).join(", ")}
                   </Label>
