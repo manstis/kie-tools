@@ -134,3 +134,15 @@ export const convertFromDataField = (item: DataField) => {
   }
   return convertedField;
 };
+
+export const getPathsString = (path: Array<number>): string => {
+  return path.map((item) => `[${item}].children`).join("");
+};
+
+export const getParentPathString = (path: Array<number>): string => {
+  return path.map((item, index) => (index === path.length - 1 ? `[${item}]` : `[${item}].children`)).join("");
+};
+
+export const getChildPathString = (path: Array<number>, childIndex: number): string => {
+  return getPathsString(path) + `[${childIndex}]`;
+};

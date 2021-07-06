@@ -24,20 +24,20 @@ import { Label } from "@patternfly/react-core/dist/js/components/Label";
 import { TrashIcon } from "@patternfly/react-icons/dist/js/icons/trash-icon";
 import { OutlinedListAltIcon } from "@patternfly/react-icons";
 import { DDDataField } from "../DataDictionaryContainer/DataDictionaryContainer";
-import "./DataTypeItem.scss";
 import ConstraintsLabel from "../ConstraintsLabel/ConstraintsLabel";
 import { Validated } from "../../../types";
 import PropertiesLabels from "../PropertiesLabels/PropertiesLabels";
 import { useValidationRegistry } from "../../../validation";
 import { Builder } from "../../../paths";
 import { ValidationIndicator } from "../../EditorCore/atoms";
+import "./DataTypeItem.scss";
 
 interface DataTypeItemProps {
   dataType: DDDataField;
   index: number;
   editingIndex: number | undefined;
   onSave: (dataType: DDDataField, index: number | null) => void;
-  onEdit?: (index: number, isChildren?: boolean) => void;
+  onEdit?: (index: number, path?: number) => void;
   onDelete?: (index: number) => void;
   onConstraintsSave: (dataType: DDDataField) => void;
   onValidate: (dataTypeName: string) => boolean;
@@ -49,17 +49,7 @@ const DataTypeItem = (props: DataTypeItemProps) => {
     props;
   const [name, setName] = useState(dataType.name);
   const [typeSelection, setTypeSelection] = useState<DDDataField["type"]>(dataType.type);
-  // const [isTypeSelectOpen, setIsTypeSelectOpen] = useState(false);
-  // const typeOptions = [
-  //   { value: "string" },
-  //   { value: "integer" },
-  //   { value: "float" },
-  //   { value: "double" },
-  //   { value: "boolean" },
-  // ];
   const [optypeSelection, setOptypeSelection] = useState(dataType.optype);
-  // const [isOptypeSelectOpen, setIsOptypeSelectOpen] = useState(false);
-  // const optypeOptions = [{ value: "categorical" }, { value: "ordinal" }, { value: "continuous" }];
   const [validation, setValidation] = useState<Validated>("default");
 
   const ref = useOnclickOutside(
@@ -69,39 +59,10 @@ const DataTypeItem = (props: DataTypeItemProps) => {
     { eventTypes: ["click"], disabled: editingIndex !== index }
   );
 
-  // const handleNameChange = (value: string) => {
-  //   setName(value);
-  //   setValidation(onValidate(value) ? "default" : "error");
-  // };
-  //
-  // const typeToggle = (isOpen: boolean) => {
-  //   setIsTypeSelectOpen(isOpen);
-  // };
-  //
-  // const typeSelect = (event: React.MouseEvent | React.ChangeEvent, value: string | SelectOptionObject) => {
-  //   if (value !== typeSelection) {
-  //     setTypeSelection(value as DDDataField["type"]);
-  //     setIsTypeSelectOpen(false);
-  //     onSave({ ...dataType, type: value as DDDataField["type"] }, index);
-  //   }
-  // };
-  //
-  // const optypeToggle = (isOpen: boolean) => {
-  //   setIsOptypeSelectOpen(isOpen);
-  // };
-  //
-  // const optypeSelect = (event: React.MouseEvent | React.ChangeEvent, value: string | SelectOptionObject) => {
-  //   if (value !== optypeSelection) {
-  //     setOptypeSelection(value as DDDataField["optype"]);
-  //     setIsOptypeSelectOpen(false);
-  //     onSave({ ...dataType, optype: value as DDDataField["optype"] }, index);
-  //   }
-  // };
-
   const handleEditStatus = (event: BaseSyntheticEvent) => {
     event.preventDefault();
     event.stopPropagation();
-    onEdit?.(index);
+    onEdit?.(index, dataType.type === "structure" ? index : undefined);
   };
 
   const handleSave = (event?: React.FormEvent<HTMLFormElement>) => {
@@ -126,10 +87,6 @@ const DataTypeItem = (props: DataTypeItemProps) => {
     }
   };
 
-  // const handleConstraints = () => {
-  //   onConstraintsEdit({ ...dataType, name, type: typeSelection });
-  // };
-
   const handleConstraintsDelete = () => {
     const updatedDataType = { ...dataType };
     delete updatedDataType.constraints;
@@ -142,7 +99,7 @@ const DataTypeItem = (props: DataTypeItemProps) => {
 
   useEffect(() => {
     if (editingIndex === index) {
-      const input = document.querySelector<HTMLInputElement>(`.data-type-item-n${index} #name`);
+      const input = document.querySelector<HTMLInputElement>(`.data-dictionary__properties-edit__form #name`);
       input?.focus();
       if (name.startsWith("New Data Type")) {
         input?.select();
@@ -159,7 +116,7 @@ const DataTypeItem = (props: DataTypeItemProps) => {
     setName(dataType.name);
     setTypeSelection(dataType.type);
     setOptypeSelection(dataType.optype);
-  }, [dataType]);
+  }, [dataType.name, dataType.type, dataType.optype]);
 
   const { validationRegistry } = useValidationRegistry();
   const validations = useMemo(

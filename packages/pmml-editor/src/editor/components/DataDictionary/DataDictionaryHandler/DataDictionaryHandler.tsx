@@ -16,6 +16,7 @@ import { useValidationRegistry } from "../../../validation";
 import { Builder } from "../../../paths";
 import { ValidationIndicatorTooltip } from "../../EditorCore/atoms";
 import DataDictionaryContainer, { DDDataField } from "../DataDictionaryContainer/DataDictionaryContainer";
+import { get, set } from "lodash";
 
 const DataDictionaryHandler = () => {
   const [isDataDictionaryOpen, setIsDataDictionaryOpen] = useState(false);
@@ -31,7 +32,7 @@ const DataDictionaryHandler = () => {
   //   setIsDataDictionaryOpen(!isDataDictionaryOpen);
   // };
 
-  const addField = (name: string, type: DDDataField["type"], optype: DDDataField["optype"], index?: number) => {
+  const addField = (name: string, type: DDDataField["type"], optype: DDDataField["optype"], pathString?: string) => {
     // dispatch({
     //   type: Actions.AddDataDictionaryField,
     //   payload: {
@@ -40,26 +41,19 @@ const DataDictionaryHandler = () => {
     //     optype: optype,
     //   },
     // });
-    if (index) {
-      setDictionary((previousDictionary) =>
-        previousDictionary.map((field, fieldIndex) => {
-          return fieldIndex === index
-            ? {
-                ...field,
-                children: field.children
-                  ? [
-                      ...field.children,
-                      {
-                        name,
-                        type,
-                        optype,
-                      },
-                    ]
-                  : [{ name, type, optype }],
-              }
-            : field;
-        })
-      );
+    if (pathString) {
+      setDictionary((previousDictionary) => {
+        const updatedType = get(previousDictionary, pathString);
+        updatedType.children = [
+          ...(updatedType.children ?? []),
+          {
+            name,
+            type,
+            optype,
+          },
+        ];
+        return [...previousDictionary];
+      });
     } else {
       setDictionary((previousDictionary) => [
         ...previousDictionary,
@@ -123,7 +117,7 @@ const DataDictionaryHandler = () => {
     });
   };
 
-  const updateField = (index: number, originalName: string, updatedField: DDDataField) => {
+  const updateField = (path: string, updatedField: DDDataField) => {
     // dispatch({
     //   type: Actions.UpdateDataDictionaryField,
     //   payload: {
@@ -132,13 +126,18 @@ const DataDictionaryHandler = () => {
     //     originalName: originalName as FieldName
     //   }
     // });
-    if (index >= 0 && index < dictionary.length) {
-      setDictionary((previousDictionary) => {
-        return previousDictionary.map((field, fieldIndex) => {
-          return fieldIndex !== index ? field : { ...updatedField };
-        });
-      });
+    const fieldToUpdate = get(dictionary, path, null);
+    if (fieldToUpdate) {
+      setDictionary((prevState) => [...set(prevState, path, updatedField)]);
     }
+
+    // if (index >= 0 && index < dictionary.length) {
+    //   setDictionary((previousDictionary) => {
+    //     return previousDictionary.map((field, fieldIndex) => {
+    //       return fieldIndex !== index ? field : { ...updatedField };
+    //     });
+    //   });
+    // }
   };
 
   const handleEditingPhase = (status: boolean) => {

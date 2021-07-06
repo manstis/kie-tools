@@ -140,6 +140,16 @@ const DataDictionaryPropertiesEdit = (props: DataDictionaryPropertiesEditProps) 
     }
   };
 
+  useEffect(() => {
+    // on first render focus on name field
+    const input = document.querySelector<HTMLInputElement>(`.data-dictionary__properties-edit__form #name`);
+    input?.focus();
+    // if it's a new field, select also the name content to quickly overwrite it
+    if (name.startsWith("New Data Type")) {
+      input?.select();
+    }
+  }, []);
+
   const isStructure = useMemo(() => typeSelection === "structure", [typeSelection]);
 
   return (
