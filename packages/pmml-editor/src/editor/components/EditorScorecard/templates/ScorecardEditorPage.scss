@@ -100,9 +100,25 @@
     .editable-item__inner {
       padding: 1em !important;
     }
+
+    .editable-item__delete {
+      visibility: visible;
+    }
   }
 
   &:last-child {
     margin-bottom: 0 !important;
+  }
+
+  &__delete {
+    visibility: hidden;
+  }
+
+  &:focus-within .editable-item__delete {
+    visibility: visible;
+  }
+
+  &:hover .editable-item__delete {
+    visibility: visible;
   }
 }
